@@ -1,0 +1,14 @@
+{
+    "name": "iamfat/oauth",
+    "description": "OAuth",
+    "require": {
+        "adoy/oauth2": "dev-master",
+        "bshaffer/oauth2-server-php": "dev-develop"
+    },
+    "authors": [
+        {
+            "name": "Jia Huang",
+            "email": "iamfat@gmail.com"
+        }
+    ]
+}
