@@ -13,7 +13,7 @@ namespace Model\OAuth\Storage {
    		private $_db;
    		private $_table;
 
-		function __construct($connection=NULL, $config = array()) {
+		function __construct($connection=null, $config = array()) {
 			$this->_db = \Model\Database::db($connection);
 			$this->_table = array_merge([
 				'client' => '_oauth_client',
@@ -28,13 +28,16 @@ namespace Model\OAuth\Storage {
 	    /* ClientCredentialsInterface */
 	    public function checkClientCredentials($client_id, $client_secret = null)
 	    {
-	        $secret = $this->_db->value("SELECT client_secret FROM `%s` WHERE client_id='%s'", $this->_table['client'], $client_id);
+	        $secret = $this->_db->value('SELECT "client_secret" FROM :table WHERE "client_id"=:id', 
+                            [':table'=>$this->_table['client']], [':id'=>$client_id]);
 	        return $secret == $client_secret;
 	    }
 
 	    public function getClientDetails($client_id)
 	    {
-	        return $this->_db->query("SELECT * FROM `%s` WHERE client_id='%s'", $this->_table['client'], $client_id)->row('assoc');
+            $st = $this->_db->query('SELECT * FROM :table WHERE "client_id"=:id', 
+                                    [':table'=>$this->table['client']], [':id'=>$client_id]);
+	        return $st ? $st->row('assoc') : [];
 	    }
 
 	    public function checkRestrictedGrantType($client_id, $grant_type)
@@ -51,10 +54,10 @@ namespace Model\OAuth\Storage {
 	    /* AccessTokenInterface */
 	    public function getAccessToken($access_token)
 	    {
-	        $query = $this->_db->query("SELECT * FROM `%s` where access_token = '%s'"
-	        		, $this->_table['access_token']
-	        		, $access_token);
-			$token = $query->row('assoc');
+	        $query = $this->_db->query('SELECT * FROM :table where "access_token" = :token',
+                        [':table'=>$this->_table['access_token']],
+	        		    [':token'=>$access_token]);
+			$token = $query ? $query->row('assoc') : null;
 			if ($token) {
 				$token['expires'] = strtotime($token['expires']);
 			}
@@ -68,25 +71,36 @@ namespace Model\OAuth\Storage {
 
 	        // if it exists, update it.
 	        if ($this->getAccessToken($access_token)) {
-	            $SQL = "UPDATE `%s` SET client_id='%s', expires='%s', user_id='%s', scope='%s' where access_token='%s'";
-	            $this->_db->query($SQL
-	        		, $this->_table['access_token']
-	        		, $client_id, $expires, $user_id, $scope
-	        		, $access_token);
+	            $this->_db->query('UPDATE :table SET "client_id"=:client_id, "expires"=:expires, "user_id"=:user_id, "scope"=:scope where "access_token"=:token',
+	        		[':table'=>$this->_table['access_token']],
+	        		[
+                        ':client_id'=>$client_id, 
+                        ':expires'=>$expires, 
+                        ':user_id'=>$user_id, 
+                        ':scope'=>$scope,
+	        		    ':token'=>$access_token
+                    ]);
 	        } else {
-	        	$SQL = "INSERT INTO `%s` (access_token, client_id, expires, user_id, scope) VALUES ('%s', '%s', '%s', '%s', '%s')";
-	            $this->_db->query($SQL
-	        		, $this->_table['access_token']
-	        		, $access_token
-	        		, $client_id, $expires, $user_id, $scope);
+	        	$SQL = '';
+	            $this->_db->query('INSERT INTO :table ("access_token", "client_id", "expires", "user_id", "scope") VALUES (:token, :client_id, :expires, :user_id, :scope)', 
+                    [':table'=>$this->_table['access_token']],
+	        		[
+                        ':client_id'=>$client_id, 
+                        ':expires'=>$expires, 
+                        ':user_id'=>$user_id, 
+                        ':scope'=>$scope,
+	        		    ':token'=>$access_token
+                    ]);
 	        }
 	    }
 
 	    /* AuthorizationCodeInterface */
 	    public function getAuthorizationCode($code)
 	    {
-	        $query = $this->_db->query("SELECT * FROM `%s` where authorization_code = '%s'", $this->_table['code'], $code);
-			$code = $query->row('assoc');
+	        $query = $this->_db->query('SELECT * FROM :table WHERE "authorization_code" = :code', 
+                        [':table'=>$this->_table['code']], 
+                        [':code'=>$code]);
+			$code = $query ? $query->row('assoc') : null;
 			if ($code) {
 				$code['expires'] = strtotime($code['expires']);
 			}
@@ -100,24 +114,38 @@ namespace Model\OAuth\Storage {
 
 	        // if it exists, update it.
 	        if ($this->getAuthorizationCode($code)) {
-	            $SQL = "UPDATE `%s` SET client_id='%s', user_id='%s', redirect_uri='%s', expires='%s', scope='%s' WHERE authorization_code='%s'";
-	            $this->_db->query($SQL
-	        		, $this->_table['code']
-	        		, $client_id, $user_id, $redirect_uri, $expires, $scope
-	        		, $code);
+	            $this->_db->query('UPDATE :table SET "client_id"=:client_id, "user_id"=:user_id, 
+                                        "redirect_uri"=:uri, "expires"=:expires, "scope"=:scope 
+                                        WHERE "authorization_code"=:code', 
+                                [':table'=>$this->_table['code']],
+                                [
+                                    ':client_id'=>$client_id, 
+                                    ':user_id'=>$user_id, 
+                                    ':uri'=>$redirect_uri, 
+                                    ':expires'=>$expires, 
+                                    ':scope'=>$scope, 
+                                    ':code'=>$code
+                                ]);
 	        } else {
-	        	$SQL = "INSERT INTO `%s` (authorization_code, client_id, user_id, redirect_uri, expires, scope) VALUES ('%s', '%s', '%s', '%s', '%s', '%s')";
-	            $this->_db->query($SQL
-	        		, $this->_table['code']
-	        		, $code
-	        		, $client_id, $user_id, $redirect_uri, $expires, $scope);
+	        	$SQL = "";
+	            $this->_db->query('INSERT INTO :table ("authorization_code", "client_id", "user_id", "redirect_uri", "expires", "scope") VALUES (:code, :client_id :user_id, :uri, :expires, :scope)',
+	        		 [':table'=>$this->_table['code']],
+                     [
+                         ':client_id'=>$client_id, 
+                         ':user_id'=>$user_id, 
+                         ':uri'=>$redirect_uri, 
+                         ':expires'=>$expires, 
+                         ':scope'=>$scope, 
+                         ':code'=>$code
+                     ]);
 	        }
 	    }
 
 	    public function expireAuthorizationCode($code)
 	    {
-			$this->_db->query("DELETE FROM `%s` WHERE authorization_code='%s'"
-	        		, $this->_table['code'], $code);
+			$this->_db->query('DELETE FROM :table WHERE "authorization_code"=:code',
+                            [':table'=>$this->_table['code']], 
+                            [':code'=>$code]);
 	    }
 
 	    /* UserCredentialsInterface */
@@ -137,9 +165,10 @@ namespace Model\OAuth\Storage {
 	    /* RefreshTokenInterface */
 	    public function getRefreshToken($refresh_token)
 	    {
-	    	$query = $this->_db->query("SELECT * FROM `%s` WHERE refresh_token='%s'"
-	    		, $this->_table['refresh_token'], $refresh_token);
-	    	$token = $query->row('assoc');
+	    	$query = $this->_db->query('SELECT * FROM :table WHERE "refresh_token"=:token',
+                                    [':table'=>$this->_table['refresh_token']], 
+                                    [':token'=>$refresh_token]);
+	    	$token = $query ? $query->row('assoc') : null;
 	    	if ($token) {
 				$token['expires'] = strtotime($token['expires']);	    		
 	    	}
@@ -152,17 +181,23 @@ namespace Model\OAuth\Storage {
 	        // convert expires to datestring
 	        $expires = date('Y-m-d H:i:s', $expires);
 
-        	$SQL = "INSERT INTO `%s` (refresh_token, client_id, expires, user_id, scope) VALUES ('%s', '%s', '%s', '%s', '%s')";
-            $this->_db->query($SQL
-        		, $this->_table['refresh_token']
-        		, $refresh_token
-        		, $client_id, $user_id, $expires, $scope);
+            $this->_db->query('INSERT INTO :table ("refresh_token", "client_id", "expires", "user_id", "scope") 
+                                VALUES (:token, :client_id, :expires, :user_id, :scope)',
+                                [':table'=>$this->_table['refresh_token']],
+                                [
+                                    ':token'=>$refresh_token, 
+                                    ':client_id'=>$client_id, 
+                                    ':user_id'=>$user_id, 
+                                    ':expires'=>$expires, 
+                                    ':scope'=>$scope
+                                ]);
 	    }
 
 	    public function unsetRefreshToken($refresh_token)
 	    {
-			$this->_db->query("DELETE FROM `%s` WHERE refresh_token='%s'"
-	        		, $this->_table['refresh_token'], $refresh_token);
+			$this->_db->query('DELETE FROM :table WHERE "refresh_token"=:token',
+	        		    [':table'=>$this->_table['refresh_token']], 
+                        [':token'=>$refresh_token]);
 	    }
 
 	    // plaintext passwords are bad!  Override this for your application
@@ -188,13 +223,15 @@ namespace Model\OAuth\Storage {
 
 	    public function getClientKey($client_id, $subject)
 	    {
-	    	return $this->_db->value("SELECT public_key FROM `%s` WHERE client_id='%s' AND subject='%s'"
-	    		, $this->_table['jwt'], $client_id, $subject);
+	    	return $this->_db->value('SELECT "public_key" FROM :table WHERE "client_id"=:client_id AND "subject"=:subject',
+                                [':table'=>$this->_table['jwt']], 
+                                [':client_id'=>$client_id, ':subject'=>$subject]);
 	    }
 
 	    public function getClientScope($user_id, $client_id) {
-	    	$client_scope = $this->_db->value("SELECT scope FROM `%s` WHERE user_id='%s' AND client_id='%s'"
-	    		, $this->_table['client_scope'], $user_id, $client_id);
+	    	$client_scope = $this->_db->value('SELECT "scope" FROM :table WHERE "user_id"=:user_id AND "client_id"=:client_id',
+                                            [':table'=>$this->_table['client_scope']],
+                                            [':user_id'=>$user_id, ':client_id'=>$client_id]);
 	    	return $client_scope;
 	    }
 
@@ -204,17 +241,21 @@ namespace Model\OAuth\Storage {
 	    	if ($client_scope) {
 	    		$client_scope = array_merge(explode(' ', $client_scope), explode(' ', $scope));
 	    		$client_scope = implode(' ', $client_scope);
-	            $SQL = "UPDATE `%s` SET scope='%s' where user_id='%s' AND client_id='%s'";
-	            $this->_db->query($SQL
-	        		, $this->_table['client_scope']
-	        		, $client_scope
-	        		, $user_id, $client_id);
+	            $this->_db->query('UPDATE :table SET "scope"=:scope WHERE "user_id"=:user_id AND "client_id"=:client_id',
+                                [':table'=>$this->_table['client_scope']],
+                                [
+                                    ':scope'=>$client_scope,
+	        		                ':user_id'=>$user_id, 
+                                    ':client_id'=>$client_id
+                                ]);
 	        } else {
-	        	$SQL = "INSERT INTO `%s` (user_id, client_id, scope) VALUES ('%s', '%s', '%s')";
-	            $this->_db->query($SQL
-	        		, $this->_table['client_scope']
-	        		, $user_id, $client_id
-	        		, $scope);
+	            $this->_db->query('INSERT INTO :table ("user_id", "client_id", "scope") VALUES ('%s', '%s', '%s')',
+                                [':table'=>$this->_table['client_scope']],
+                                [
+                                    ':user_id'=>$user_id, 
+                                    ':client_id'=>$client_id,
+                                    ':scope'=>$scope
+                                ]);
 	        }
 	    }
 
@@ -225,18 +266,19 @@ namespace Model\OAuth\Storage {
 	    	if ($client_scope) {
 	    		$client_scope = array_diff(explode(' ', $client_scope), explode(' ', $scope));
 	    		if (count($client_scope) == 0) {
-	    			$SQL = "DELETE FROM `%s` WHERE user_id='%s' AND client_id='%s'";
-	    			$this->_db->query($SQL
-	    				, $this->_table['client_scope']
-	    				, $user_id, $client_id);
+	    			$this->_db->query('DELETE FROM :table WHERE "user_id"=:user_id AND "client_id"=:client_id',
+                                    [':table'=>$this->_table['client_scope']],
+                                    [':user_id'=>$user_id, ':client_id'=>$client_id]);
 	    		}
 	    		else {
 	    			$client_scope = implode(' ', $client_scope);
-		            $SQL = "UPDATE `%s` SET scope='%s' where user_id='%s' AND client_id='%s'";
-		            $this->_db->query($SQL
-		        		, $this->_table['client_scope']
-		        		, $client_scope
-		        		, $user_id, $client_id);
+		            $this->_db->query('UPDATE :table SET "scope"=:scope WHERE "user_id"=:user_id AND "client_id"=:client_id',
+                                    [':table'=>$this->_table['client_scope']],
+                                    [
+                                        ':scope'=>$client_scope, 
+                                        ':user_id'=>$user_id, 
+                                        ':client_id'=>$client_id
+                                    ]);
 	    		}
 	        }
 	    }

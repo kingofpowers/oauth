@@ -32,7 +32,7 @@ namespace Model\OAuth {
 		}
 
 		function get_username() {
-			if (!$this->_verified) return NULL;
+			if (!$this->_verified) return null;
 			$token_data = $this->_server->getAccessTokenData($this->_request, $this->_response);
 			return $token_data['user_id'];
 		}

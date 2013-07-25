@@ -51,7 +51,7 @@ namespace Controller\CGI\OAuth {
 
 			// check if is authorized
 			$scope = $this->_storage->getClientScope($user_id, $client_id);
-			if ($scope !== NULL) {
+			if ($scope !== null) {
 				$this->_server->handleAuthorizeRequest($request, $response, TRUE, $user_id)->send();
 				return FALSE;
 			}

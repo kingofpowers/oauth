@@ -31,7 +31,7 @@ namespace Controller\CGI\OAuth {
 				// got authorization code, try to acquire access token
 				$params = ['code'=>$form['code'], 'redirect_uri'=>$redirect_uri];
 				$response = $client->getAccessToken($s['token'], 'authorization_code', $params);
-			    $access_token = isset($response['error']) ? NULL : $response['result']['access_token'];
+			    $access_token = isset($response['error']) ? null : $response['result']['access_token'];
 			    $_SESSION['oauth.client.token'][$source] = $access_token ?: '@'.$response['error'];
 			}
 			else {
