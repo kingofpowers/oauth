@@ -15,7 +15,7 @@ namespace Controller\CGI\OAuth {
 
 		function action_auth() {
 
-			$form = \Model\CGI::form();
+			$form = $this->form();
 
 			$source = $form['source'];
 			$s = (array) _CONF('oauth.client')['servers'][$source];
