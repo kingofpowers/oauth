@@ -4,6 +4,6 @@
 	"description": "OAuth2 Support",
 	"version": "0.1",
 	"build": {
-	    "copy": ["composer.json", "raw"]
+	    "copy": ["vendor", "raw"]
 	}
 }
