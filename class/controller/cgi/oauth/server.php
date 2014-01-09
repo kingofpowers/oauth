@@ -32,7 +32,7 @@ namespace Controller\CGI\OAuth {
 
 			// check if user is logged in?
 			if (!\Model\Auth::logged_in()) {
-			    $_SESSION['#LOGIN_REFERER'] = URL('oauth/server/auth', $this->form()['get']);
+			    $_SESSION['#LOGIN_REFERER'] = URL('oauth/server/auth', $this->form('get'));
 				\Model\CGI::redirect(_CONF('oauth.server')['login_url']);
 			}
 
