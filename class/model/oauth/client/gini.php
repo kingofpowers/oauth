@@ -1,0 +1,49 @@
+<?php
+
+namespace Model\OAuth\Client {
+
+    use \League\OAuth2\Client\Provider\IdentityProvider;
+    use \League\OAuth2\Client\Provider\User;
+    use \League\OAuth2\Client\Token\AccessToken;
+
+	class Gini extends IdentityProvider {
+
+        public $scopes = ['user'];
+        public $responseType = 'json';
+        public $options = [];
+
+        public function urlAuthorize() {
+            return $this->options['auth'];
+        }
+
+        public function urlAccessToken() {
+            return $this->options['token'];
+        }
+
+        public function urlUserDetails(AccessToken $token) {
+            return URL($this->options['user'], ['access_token'=>(string)$token]);
+        }
+
+        public function userDetails($response, AccessToken $token) {
+            $user = new User;
+            $user->username = $response->username;
+            $user->name = $response->name;
+            $user->email = $response->email;
+            return $user;
+        }
+
+        public function userUid($response, AccessToken $token) {
+            return $response->username;
+        }
+
+        public function userEmail($response, AccessToken $token) {
+            return isset($response->email) && $response->email ? $response->email : null;
+        }
+
+        public function userScreenName($response, AccessToken $token) {
+            return $response->name;
+        }
+
+	}
+
+}

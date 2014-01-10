@@ -2,8 +2,8 @@
     "name": "iamfat/oauth",
     "description": "OAuth",
     "require": {
-        "adoy/oauth2": "dev-master",
-        "bshaffer/oauth2-server-php": "dev-develop"
+        "league/oauth2-client": "dev-master",
+        "league/oauth2-server": "3.*"
     },
     "authors": [
         {

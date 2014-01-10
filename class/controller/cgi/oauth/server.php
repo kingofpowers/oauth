@@ -1,76 +1,62 @@
 <?php
 
+// It's just a sample server controller, please override it.
+
 namespace Controller\CGI\OAuth {
 
-	class Server extends \Controller\CGI\Layout {
+    class Server extends \Controller\CGI {
 
-//		protected static $layout_name = 'phtml/oauth/layout';
+        function action_auth() {
 
-		private $_server;
-		private $_storage;
+            $form = $this->form();
+            
+            $server = new \Model\OAuth\Authorization;
+            
+            if (!$server->isValid()) return false;
 
-		function __pre_action($action, &$params) {
-			parent::__pre_action($action, $params);
+            // check if user is logged in?
+            if (!\Model\Auth::logged_in()) {
+                $_SESSION['#LOGIN_REFERER'] = URL('oauth/server/auth', $this->form('get'));
+                \Model\CGI::redirect(_CONF('oauth.server')['login_url']);
+            }
 
-			$path = \Gini\Core::file_exists('vendor/autoload.php', 'oauth');
-			require_once($path);
+            if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+                if ($form['authorize']) {
+                    // Generate an authorization code
+                    $url = $server->authorize(\Model\Auth::username());
+                }
+                else {
+                    $url = $server->deny();
+                }
+                \Model\CGI::redirect($url); 
+            }
 
-			$this->_storage = new \Model\OAuth\Storage\Database();
-			$this->_server = new \OAuth2_Server($this->_storage);
-		}
+            return new \Model\CGI\Response\HTML(V('phtml/oauth/authorize', [
+                'form' => $form,
+                'client' => $server->clientDetails()
+            ]));
+        }
 
-		function action_auth() {
+        function action_token() {
+            $server = new \Model\OAuth\Authorization;
+            $response = $server->issueAccessToken();
+            return new \Model\CGI\Response\JSON($response);
+        }
 
-			$this->_server->addGrantType(new \OAuth2_GrantType_ClientCredentials($this->_storage));
-
-			$response = new \OAuth2_Response();
-			$request = \OAuth2_Request::createFromGlobals();
-			if (!$this->_server->validateAuthorizeRequest($request, $response)) {
-				$response->send();
-				return FALSE;
-			}
-
-			// check if user is logged in?
-			if (!\Model\Auth::logged_in()) {
-			    $_SESSION['#LOGIN_REFERER'] = URL('oauth/server/auth', $this->form('get'));
-				\Model\CGI::redirect(_CONF('oauth.server')['login_url']);
-			}
-
-			$user_id = \Model\Auth::username();
-			$client_id = $request->query('client_id');
-
-			if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-				if ($request->request('authorize')) {
-					$this->_storage->setClientScope($user_id, $client_id, $request->request('scope'));
-				}
-				else {
-					$this->_server->handleAuthorizeRequest($request, $response, FALSE, $user_id)->send();
-					return FALSE;
-				}
-			}
-
-			// check if is authorized
-			$scope = $this->_storage->getClientScope($user_id, $client_id);
-			if ($scope !== null) {
-				$this->_server->handleAuthorizeRequest($request, $response, TRUE, $user_id)->send();
-				return FALSE;
-			}
-
-			$client = $this->_storage->getClientDetails($client_id);
-
-			$this->view->body = V('phtml/oauth/authorize', array('request'=>$request, 'client'=>$client));
-		}
-
-		function action_token() {
-
-			$this->_server->addGrantType(new \OAuth2_GrantType_AuthorizationCode($this->_storage));
-			$this->_server->addGrantType(new \OAuth2_GrantType_RefreshToken($this->_storage));
-			
-			// Handle a request for an OAuth2.0 Access Token and send the response to the client
-			$this->_server->handleTokenRequest(\OAuth2_Request::createFromGlobals(), new \OAuth2_Response(), TRUE)->send();
-			return FALSE;
-		}
-
-	}
+        function action_user() {
+            $resource = new \Model\OAuth\Resource($_GET['access_token']);
+            if ($resource->isValid()) {
+                $username = $resource->getUserName();
+                $user = a('user', ['username'=>$username]);
+                return new \Model\CGI\Response\JSON([
+                     'username' => $username,
+                     'name' => $user->name,
+                     'email' => $user->email,
+                ]);
+            }
+            return false;
+        }
+        
+    }
 
 }

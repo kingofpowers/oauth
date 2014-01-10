@@ -1,13 +1,5 @@
 <?php
 
-namespace Model\OAuth\Client {
-	
-	interface Driver {
-		function get_username();
-	}
-
-}
-
 namespace Model\OAuth {
 
 	class Client {
@@ -19,42 +11,72 @@ namespace Model\OAuth {
 
 		function __construct($source) {
 
-			if (!isset($_SESSION['oauth.client.token'][$source])) {
-				\Model\CGI::redirect('oauth/client/auth', array(
-					'source' => $source,
-					'redirect_uri' => URL('', $_GET),
-				));
-			}
-
 			$this->_source = $source;
 
-			$token = $_SESSION['oauth.client.token'][$source];
-			if ($token[0] == '@') {
-				$error = mb_substr($token, 1);
-				TRACE('invalid token: '.$error);
-				return;
-			}
+            if (isset($_SESSION['oauth.client.token'][$source])) {
+    			$token = $_SESSION['oauth.client.token'][$source];
+    			if (isset($token['error'])) {
+    				TRACE('invalid token: '.$token['error']);
+    			}
+                else {
+        			$this->_token = new \League\OAuth2\Client\Token\AccessToken($token);
+                }
+            }
 
-			$this->_token = $token;
+			$options = (array) _CONF('oauth.client')['servers'][$source];
 
-			$s = (array) _CONF('oauth.client')['servers'][$source];
-
-			$driver_class = '\\Model\\OAuth\\Client\\'.($s['driver']?:'rpc');
-			$this->_driver = new $driver_class($source, $token);
+			$driver_class = '\\Model\\OAuth\\Client\\'.($options['driver']?:'Unknown');
+            
+			$this->_driver = new $driver_class([
+                'clientId' => $options['client_id'],
+                'clientSecret' => $options['client_secret'],
+                'redirectUri' => URL('oauth/client/auth', ['source'=>$source]),
+                'options' => $options
+			]);
 		}
 
-		function get_username() {
-			if (!$this->_driver) return;
-			$username = $this->_driver->get_username();
-			if ($username) {
-				$username .= '%' . $this->_source;
-			}
-
-			return $username;
+		function getUserName() {
+            
+            if (!$this->_token) {
+                \Model\CGI::redirect('oauth/client/auth', [
+                    'source' => $this->_source,
+                    'redirect_uri' => URL('', $_GET)
+                ]);
+            }
+            
+			$uid = $this->_driver->getUserUid($this->_token);
+            list($username, $backend) = \Model\Auth::parse_username($uid);
+            
+            if ($backend) {
+                $backend .= '%' . $this->_source;
+            }
+            else {
+                $backend = $this->_source;
+            }
+            
+            return \Model\Auth::make_username($username, $backend);
 		}
 
-		function get_access_token() {
-			return $this->_token;
+        function authorize() {
+            $this->_driver->authorize();
+        }
+        
+		function fetchAccessToken($grant = 'authorization_code', $params = []) {
+            try {
+                $this->_token = $this->_driver->getAccessToken($grant, $params);
+ 			    $_SESSION['oauth.client.token'][$this->_source] = [
+ 			        'access_token' => $this->_token->accessToken,
+                    'refresh_token' => $this->_token->refreshToken,
+                    'expires' => $this->_token->expires,
+                    'uid' => $this->uid,
+ 			    ];
+            }
+            catch (Exception $e) {
+                $this->_token = null;
+                $_SESSION['oauth.client.token'][$this->_source] = [
+                    'error' => $e->getMessage()
+                ];
+            }
 		}
 
 	}
