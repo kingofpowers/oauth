@@ -37,6 +37,10 @@ namespace Model\OAuth {
             return $this->isValid() ? $this->_server->getOwnerId() : false;
         }
         
+        function hasScope($scope) {
+            return $this->_server->hasScope($scope);
+        }
+        
     }
     
 }
