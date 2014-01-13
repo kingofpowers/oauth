@@ -1,6 +1,6 @@
 <?php
 
-namespace Model\OAuth\Storage {
+namespace Gini\OAuth\Storage {
 
     class Database 
         implements 
@@ -11,7 +11,7 @@ namespace Model\OAuth\Storage {
         private $_db;
         
         function __construct($name=null) {
-            $this->_db = \Model\Database::db($name);   
+            $this->_db = \Gini\Database::db($name);   
         }
         
         /**

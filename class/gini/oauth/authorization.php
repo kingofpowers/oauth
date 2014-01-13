@@ -1,6 +1,6 @@
 <?php
 
-namespace Model\OAuth {
+namespace Gini\OAuth {
     
     class Authorization {
         
@@ -9,7 +9,7 @@ namespace Model\OAuth {
         
         function __construct() {
             
-            $db = new \Model\OAuth\Storage\Database;
+            $db = new \Gini\OAuth\Storage\Database;
             
             $server = new \League\OAuth2\Server\Authorization($db, $db, $db);
             $server->addGrantType(new \League\OAuth2\Server\Grant\AuthCode);

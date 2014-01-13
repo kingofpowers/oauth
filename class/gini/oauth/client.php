@@ -1,6 +1,6 @@
 <?php
 
-namespace Model\OAuth {
+namespace Gini\OAuth {
 
 	class Client {
 
@@ -25,7 +25,7 @@ namespace Model\OAuth {
 
 			$options = (array) _CONF('oauth.client')['servers'][$source];
 
-			$driver_class = '\\Model\\OAuth\\Client\\'.($options['driver']?:'Unknown');
+			$driver_class = '\\Gini\\OAuth\\Client\\'.($options['driver']?:'Unknown');
             
 			$this->_driver = new $driver_class([
                 'clientId' => $options['client_id'],
@@ -38,14 +38,14 @@ namespace Model\OAuth {
 		function getUserName() {
             
             if (!$this->_token) {
-                \Model\CGI::redirect('oauth/client/auth', [
+                \Gini\CGI::redirect('oauth/client/auth', [
                     'source' => $this->_source,
                     'redirect_uri' => URL('', $_GET)
                 ]);
             }
             
 			$uid = $this->_driver->getUserUid($this->_token);
-            list($username, $backend) = \Model\Auth::parse_username($uid);
+            list($username, $backend) = \Gini\Auth::parse_username($uid);
             
             if ($backend) {
                 $backend .= '%' . $this->_source;
@@ -54,7 +54,7 @@ namespace Model\OAuth {
                 $backend = $this->_source;
             }
             
-            return \Model\Auth::make_username($username, $backend);
+            return \Gini\Auth::make_username($username, $backend);
 		}
 
         function authorize() {

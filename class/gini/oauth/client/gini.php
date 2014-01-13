@@ -1,6 +1,6 @@
 <?php
 
-namespace Model\OAuth\Client {
+namespace Gini\OAuth\Client {
 
     use \League\OAuth2\Client\Provider\IdentityProvider;
     use \League\OAuth2\Client\Provider\User;

@@ -11,7 +11,7 @@ namespace Controller\CGI\OAuth {
 			$form = $this->form();
 
 			$source = $form['source'];
-            $client = new \Model\OAuth\Client($source);
+            $client = new \Gini\OAuth\Client($source);
             
 			if (isset($form['error'])) {
 				$_SESSION['oauth.client.token'][$source] = '@'.$form['error'];
@@ -30,7 +30,7 @@ namespace Controller\CGI\OAuth {
 			// redirect to original place
 	    	$redirect_uri = $_SESSION['oauth.client.redirect_uri'][$source];
 	    	unset($_SESSION['oauth.client.redirect_uri'][$source]);
-	    	\Model\CGI::redirect($redirect_uri);
+	    	$this->redirect($redirect_uri);
 		}
 
 	}

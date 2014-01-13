@@ -1,6 +1,6 @@
 <?php
 
-namespace Model\OAuth {
+namespace Gini\OAuth {
     
     class Resource {
         
@@ -13,7 +13,7 @@ namespace Model\OAuth {
             $request = new \League\OAuth2\Server\Util\Request(['access_token'=>$access_token], [], [], [], ['REQUEST_METHOD'=>'GET']);
             
             $server = new \League\OAuth2\Server\Resource(
-                new \Model\OAuth\Storage\Database
+                new \Gini\OAuth\Storage\Database
             );
             
             $server->setRequest($request);
