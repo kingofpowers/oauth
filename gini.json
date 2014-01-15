@@ -7,7 +7,7 @@
 	    "copy": ["vendor", "raw"]
 	},
     "dependencies": {
-        "system": ">=0.2.0",
+        "gini": ">=0.2.0",
         "auth": "*"
     }
 }
