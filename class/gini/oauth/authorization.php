@@ -31,7 +31,7 @@ namespace Gini\OAuth {
                     ->checkAuthoriseParams();
             }
             catch (\League\OAuth2\Server\Exception\ClientException $e) {
-                TRACE("%s", $e->getMessage());
+                \Gini\Logger::of('oauth')->debug('checkAuthoriseParams: {error}!', ['error' => $e->getMessage()]);
                 return false;
             }
 

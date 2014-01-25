@@ -15,10 +15,8 @@ namespace Gini\OAuth {
 
             if (isset($_SESSION['oauth.client.token'][$source])) {
     			$token = $_SESSION['oauth.client.token'][$source];
-    			if (isset($token['error'])) {
-    				TRACE('invalid token: '.$token['error']);
-    			}
-                else {
+                // \Gini\Logger::of('oauth')->error('invalid token: {error}!', ['error' => $token['error']]);
+       			if (!isset($token['error'])) {
         			$this->_token = new \League\OAuth2\Client\Token\AccessToken($token);
                 }
             }
@@ -45,7 +43,7 @@ namespace Gini\OAuth {
             }
             
 			$uid = $this->_driver->getUserUid($this->_token);
-            list($username, $backend) = \Gini\Auth::parse_username($uid);
+            list($username, $backend) = \Gini\Auth::parseUserName($uid);
             
             if ($backend) {
                 $backend .= '%' . $this->_source;
@@ -54,7 +52,7 @@ namespace Gini\OAuth {
                 $backend = $this->_source;
             }
             
-            return \Gini\Auth::make_username($username, $backend);
+            return \Gini\Auth::makeUserName($username, $backend);
 		}
 
         function authorize() {

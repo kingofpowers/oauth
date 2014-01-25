@@ -105,7 +105,7 @@ namespace Gini\OAuth\Storage {
             $db = $this->_db;
             $st = $db->query('INSERT INTO _oauth_sessions (client_id, owner_type, owner_id) VALUES (:clientId, :ownerType, :ownerId)', 
                 null, [':clientId'=>$clientId, ':ownerType'=>$ownerType, ':ownerId'=>$ownerId]);
-            return $st ? $db->insert_id() : false;
+            return $st ? $db->lastInsertId() : false;
         }
 
         /**
@@ -166,7 +166,7 @@ namespace Gini\OAuth\Storage {
             $db = $this->_db;
             $st = $db->query('INSERT INTO _oauth_session_access_tokens (session_id, access_token, access_token_expires) VALUES (:sessionId, :accessToken, :accessTokenExpire)', 
                 null, [':sessionId'=>$sessionId, ':accessToken'=>$accessToken, ':accessTokenExpire'=>$expireTime]);
-            return $st ? $db->insert_id() : false;
+            return $st ? $db->lastInsertId() : false;
         }
 
         /**
@@ -210,7 +210,7 @@ namespace Gini\OAuth\Storage {
             $db = $this->_db;
             $st = $db->query('INSERT INTO _oauth_session_authcodes (session_id, auth_code, auth_code_expires) VALUES (:sessionId, :authCode, :authCodeExpires)', 
                 null, [':sessionId'=>$sessionId, ':authCode'=>$authCode, ':authCodeExpires'=>$expireTime]);
-            return $st ? $db->insert_id() : false;
+            return $st ? $db->lastInsertId() : false;
         }
 
         /**

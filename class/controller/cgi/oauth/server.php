@@ -23,7 +23,7 @@ namespace Controller\CGI\OAuth {
             if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 if ($form['authorize']) {
                     // Generate an authorization code
-                    $url = $server->authorize(\Gini\Auth::username());
+                    $url = $server->authorize(\Gini\Auth::userName());
                 }
                 else {
                     $url = $server->deny();
