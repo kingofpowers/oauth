@@ -15,9 +15,9 @@ namespace Controller\CGI\OAuth {
             if (!$server->isValid()) return false;
 
             // check if user is logged in?
-            if (!\Gini\Auth::logged_in()) {
+            if (!\Gini\Auth::isLoggedIn()) {
                 $_SESSION['#LOGIN_REFERER'] = URL('oauth/server/auth', $this->form('get'));
-                $this->redirect(_CONF('oauth.server')['login_url']);
+                $this->redirect(\Gini\Config::get('oauth.server')['login_url']);
             }
 
             if ($_SERVER['REQUEST_METHOD'] == 'POST') {
