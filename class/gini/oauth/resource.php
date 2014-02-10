@@ -13,7 +13,7 @@ namespace Gini\OAuth {
             $request = new \League\OAuth2\Server\Util\Request(['access_token'=>$access_token], [], [], [], ['REQUEST_METHOD'=>'GET']);
             
             $server = new \League\OAuth2\Server\Resource(
-                new \Gini\OAuth\Storage\Database
+                \Gini\IoC::construct('\Gini\OAuth\Storage\Database')
             );
             
             $server->setRequest($request);

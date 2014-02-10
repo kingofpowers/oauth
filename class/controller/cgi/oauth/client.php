@@ -11,7 +11,7 @@ namespace Controller\CGI\OAuth {
 			$form = $this->form();
 
 			$source = $form['source'];
-            $client = new \Gini\OAuth\Client($source);
+            $client = \Gini\IoC::construct('\Gini\OAuth\Client', $source);
             
 			if (isset($form['error'])) {
 				$_SESSION['oauth.client.token'][$source] = '@'.$form['error'];

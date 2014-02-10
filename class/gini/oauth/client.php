@@ -23,9 +23,9 @@ namespace Gini\OAuth {
 
 			$options = (array) \Gini\Config::get('oauth.client')['servers'][$source];
 
-			$driver_class = '\\Gini\\OAuth\\Client\\'.($options['driver']?:'Unknown');
+			$driver_class = '\Gini\OAuth\Client\\'.($options['driver']?:'Unknown');
             
-			$this->_driver = new $driver_class([
+			$this->_driver = \Gini\IoC::construct($driver_class, [
                 'clientId' => $options['client_id'],
                 'clientSecret' => $options['client_secret'],
                 'redirectUri' => URL('oauth/client/auth', ['source'=>$source]),

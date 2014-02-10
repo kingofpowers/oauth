@@ -9,7 +9,7 @@ namespace Gini\OAuth {
         
         function __construct() {
             
-            $db = new \Gini\OAuth\Storage\Database;
+            $db = \Gini\IoC::construct('\Gini\OAuth\Storage\Database');
             
             $server = new \League\OAuth2\Server\Authorization($db, $db, $db);
             $server->addGrantType(new \League\OAuth2\Server\Grant\AuthCode);
