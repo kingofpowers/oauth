@@ -1,25 +1,25 @@
 <?php
 
 namespace Gini\OAuth {
-    
-    class Authorization {
-        
+
+    class Authorization
+    {
         private $_server;
         private $_params;
-        
-        function __construct() {
-            
+
+        function __construct()
+        {
             $db = \Gini\IoC::construct('\Gini\OAuth\Storage\Database');
-            
+
             $server = new \League\OAuth2\Server\Authorization($db, $db, $db);
             $server->addGrantType(new \League\OAuth2\Server\Grant\AuthCode);
 
             $this->_server = $server;
 
         }
-        
-        function isValid() {
-            
+
+        function isValid()
+        {
             $server = $this->_server;
 
             // Enable the authorization code grant type
@@ -29,27 +29,29 @@ namespace Gini\OAuth {
                 $this->_params = $server
                     ->getGrantType('authorization_code')
                     ->checkAuthoriseParams();
-            }
-            catch (\League\OAuth2\Server\Exception\ClientException $e) {
+            } catch (\League\OAuth2\Server\Exception\ClientException $e) {
                 \Gini\Logger::of('oauth')->debug('checkAuthoriseParams: {error}!', ['error' => $e->getMessage()]);
+
                 return false;
             }
 
             return true;
         }
-        
-        function clientDetails() {
+
+        function clientDetails()
+        {
             return $this->_params['client_details'];
         }
-        
-        function authorize($username) {
+
+        function authorize($username)
+        {
             $server = $this->_server;
-            
+
             // Generate an authorization code
-            $code 
+            $code
                 = $server->getGrantType('authorization_code')
                     ->newAuthoriseRequest('user', $username, $this->_params);
-            
+
             return \League\OAuth2\Server\Util\RedirectUri::make(
                 $this->_params['redirect_uri'],
                 [
@@ -59,9 +61,11 @@ namespace Gini\OAuth {
             );
 
         }
-        
-        function deny() {
+
+        function deny()
+        {
             $server = $this->_server;
+
             return \League\OAuth2\Server\Util\RedirectUri::make(
                 $this->_params['redirect_uri'],
                 [
@@ -71,16 +75,17 @@ namespace Gini\OAuth {
                 ]
             );
         }
-        
-        function issueAccessToken() {
+
+        function issueAccessToken()
+        {
             $server = $this->_server;
-            
+
             $server->addGrantType(new \League\OAuth2\Server\Grant\RefreshToken);
-			
+
             try {
                 // Tell the auth server to issue an access token
                 $response = $server->issueAccessToken();
-            } 
+            }
             // Throw an exception because there was a problem with the client's request
             catch (\League\OAuth2\Server\Exception\ClientException $e) {
 
@@ -94,7 +99,7 @@ namespace Gini\OAuth {
                     $server::getExceptionType($e->getCode())
                 ));
 
-            } 
+            }
             // Throw an error when a non-library specific exception has been thrown
             catch (Exception $e) {
 
@@ -103,10 +108,10 @@ namespace Gini\OAuth {
                     'error_description' => $e->getMessage()
                 );
             }
-            
+
             return $response;
         }
-        
+
     }
-    
+
 }

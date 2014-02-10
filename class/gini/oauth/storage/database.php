@@ -2,18 +2,19 @@
 
 namespace Gini\OAuth\Storage {
 
-    class Database 
-        implements 
+    class Database
+        implements
         \League\OAuth2\Server\Storage\ClientInterface,
         \League\OAuth2\Server\Storage\SessionInterface,
         \League\OAuth2\Server\Storage\ScopeInterface {
-        
+
         private $_db;
-        
-        function __construct($name=null) {
-            $this->_db = \Gini\Database::db($name);   
+
+        function __construct($name=null)
+        {
+            $this->_db = \Gini\Database::db($name);
         }
-        
+
         /**
          * Validate a client
          *
@@ -27,12 +28,12 @@ namespace Gini\OAuth\Storage {
          *  WHERE oc.id = :clientId AND oce.redirect_uri = :redirectUri
          *
          * # Client ID + client secret
-         * SELECT oc.id, oc.secret, oc.name, oc.auto_approve FROM oauth_clients 
+         * SELECT oc.id, oc.secret, oc.name, oc.auto_approve FROM oauth_clients
          * WHERE oc.id = :clientId AND oc.secret = :clientSecret
          *
          * # Client ID + client secret + redirect URI
          * SELECT oc.id, oc.secret, oce.redirect_uri, oc.name,
-         * oc.auto_approve FROM oauth_clients LEFT JOIN oauth_client_endpoints 
+         * oc.auto_approve FROM oauth_clients LEFT JOIN oauth_client_endpoints
          * ON oce.client_id = oc.id
          * WHERE oc.id = :clientId AND oc.secret = :clientSecret AND
          * oce.redirect_uri = :redirectUri
@@ -57,35 +58,34 @@ namespace Gini\OAuth\Storage {
          * @param  string     $grantType    The grant type used in the request (default = "null")
          * @return bool|array               Returns false if the validation fails, array on success
          */
-        public function getClient($clientId, $clientSecret = null, $redirectUri = null, $grantType = null) {
-            
+        public function getClient($clientId, $clientSecret = null, $redirectUri = null, $grantType = null)
+        {
             $db = $this->_db;
-            
+
             if ($clientSecret === null) {
                 $st = $db->query(
-                    'SELECT oc.id, oc.secret, oce.redirect_uri, oc.name, oc.auto_approve FROM _oauth_clients AS oc LEFT JOIN _oauth_client_endpoints AS oce ON oce.client_id = oc.id WHERE oc.id = :clientId AND oce.redirect_uri = :redirectUri', 
+                    'SELECT oc.id, oc.secret, oce.redirect_uri, oc.name, oc.auto_approve FROM _oauth_clients AS oc LEFT JOIN _oauth_client_endpoints AS oce ON oce.client_id = oc.id WHERE oc.id = :clientId AND oce.redirect_uri = :redirectUri',
                     null, [':clientId'=>$clientId, ':redirectUri'=>$redirectUri]
                 );
-            }
-            elseif ($redirectUri === null) {
+            } elseif ($redirectUri === null) {
                 $st = $db->query(
-                    'SELECT oc.id, oc.secret, oc.name, oc.auto_approve FROM _oauth_clients AS oc WHERE oc.id = :clientId AND oc.secret = :clientSecret', 
+                    'SELECT oc.id, oc.secret, oc.name, oc.auto_approve FROM _oauth_clients AS oc WHERE oc.id = :clientId AND oc.secret = :clientSecret',
                     null, [':clientId'=>$clientId, ':clientSecret'=>$clientSecret]);
-            }
-            else {
+            } else {
                 $st = $db->query(
-                    'SELECT oc.id, oc.secret, oce.redirect_uri, oc.name, oc.auto_approve FROM _oauth_clients AS oc LEFT JOIN _oauth_client_endpoints AS oce ON oce.client_id = oc.id WHERE oc.id = :clientId AND oc.secret = :clientSecret AND oce.redirect_uri = :redirectUri', 
+                    'SELECT oc.id, oc.secret, oce.redirect_uri, oc.name, oc.auto_approve FROM _oauth_clients AS oc LEFT JOIN _oauth_client_endpoints AS oce ON oce.client_id = oc.id WHERE oc.id = :clientId AND oc.secret = :clientSecret AND oce.redirect_uri = :redirectUri',
                     null, [':clientId'=>$clientId, ':clientSecret'=>$clientSecret, ':redirectUri'=>$redirectUri]);
             }
-            
+
             if ($st) {
                 $row = $st->row(\PDO::FETCH_ASSOC);
+
                 return $row ?: false;
             }
-            
+
             return false;
         }
-        
+
         /**
          * Create a new session
          *
@@ -101,10 +101,12 @@ namespace Gini\OAuth\Storage {
          * @param  string $ownerId   The ID of the session owner (e.g. "123")
          * @return int               The session ID
          */
-        public function createSession($clientId, $ownerType, $ownerId) {
+        public function createSession($clientId, $ownerType, $ownerId)
+        {
             $db = $this->_db;
-            $st = $db->query('INSERT INTO _oauth_sessions (client_id, owner_type, owner_id) VALUES (:clientId, :ownerType, :ownerId)', 
+            $st = $db->query('INSERT INTO _oauth_sessions (client_id, owner_type, owner_id) VALUES (:clientId, :ownerType, :ownerId)',
                 null, [':clientId'=>$clientId, ':ownerType'=>$ownerType, ':ownerId'=>$ownerId]);
+
             return $st ? $db->lastInsertId() : false;
         }
 
@@ -122,9 +124,10 @@ namespace Gini\OAuth\Storage {
          * @param  string $ownerId   The ID of the session owner (e.g. "123")
          * @return void
          */
-        public function deleteSession($clientId, $ownerType, $ownerId) {
+        public function deleteSession($clientId, $ownerType, $ownerId)
+        {
             $db = $this->_db;
-            $db->query('DELETE FROM _oauth_sessions WHERE client_id=:clientId AND owner_type=:ownerType AND owner_id=:ownerId)', 
+            $db->query('DELETE FROM _oauth_sessions WHERE client_id=:clientId AND owner_type=:ownerType AND owner_id=:ownerId)',
                 null, [':clientId'=>$clientId, ':ownerType'=>$ownerType, ':ownerId'=>$ownerId]);
         }
 
@@ -141,9 +144,10 @@ namespace Gini\OAuth\Storage {
          * @param  string $redirectUri The redirect URI
          * @return void
          */
-        public function associateRedirectUri($sessionId, $redirectUri) {
+        public function associateRedirectUri($sessionId, $redirectUri)
+        {
             $db = $this->_db;
-            $db->query('INSERT INTO _oauth_session_redirects (session_id, redirect_uri) VALUES (:sessionId, :redirectUri)', 
+            $db->query('INSERT INTO _oauth_session_redirects (session_id, redirect_uri) VALUES (:sessionId, :redirectUri)',
                 null, [':sessionId'=>$sessionId, ':redirectUri'=>$redirectUri]);
         }
 
@@ -162,10 +166,12 @@ namespace Gini\OAuth\Storage {
          * @param  int    $expireTime  Unix timestamp of the access token expiry time
          * @return int                 The access token ID
          */
-        public function associateAccessToken($sessionId, $accessToken, $expireTime) {
+        public function associateAccessToken($sessionId, $accessToken, $expireTime)
+        {
             $db = $this->_db;
-            $st = $db->query('INSERT INTO _oauth_session_access_tokens (session_id, access_token, access_token_expires) VALUES (:sessionId, :accessToken, :accessTokenExpire)', 
+            $st = $db->query('INSERT INTO _oauth_session_access_tokens (session_id, access_token, access_token_expires) VALUES (:sessionId, :accessToken, :accessTokenExpire)',
                 null, [':sessionId'=>$sessionId, ':accessToken'=>$accessToken, ':accessTokenExpire'=>$expireTime]);
+
             return $st ? $db->lastInsertId() : false;
         }
 
@@ -185,7 +191,8 @@ namespace Gini\OAuth\Storage {
          * @param  string $clientId      The client ID
          * @return void
          */
-        public function associateRefreshToken($accessTokenId, $refreshToken, $expireTime, $clientId) {
+        public function associateRefreshToken($accessTokenId, $refreshToken, $expireTime, $clientId)
+        {
             $db = $this->_db;
             $db->query('INSERT INTO _oauth_session_refresh_tokens (session_access_token_id, refresh_token, refresh_token_expires, client_id) VALUES (:accessTokenId, :refreshToken, :expireTime, :clientId)',
                  null, [':accessTokenId'=>$accessTokenId, ':refreshToken'=>$refreshToken, ':expireTime'=>$expireTime, ':clientId'=>$clientId]);
@@ -206,10 +213,12 @@ namespace Gini\OAuth\Storage {
          * @param  int    $expireTime Unix timestamp of the access token expiry time
          * @return int                The auth code ID
          */
-        public function associateAuthCode($sessionId, $authCode, $expireTime) {
+        public function associateAuthCode($sessionId, $authCode, $expireTime)
+        {
             $db = $this->_db;
-            $st = $db->query('INSERT INTO _oauth_session_authcodes (session_id, auth_code, auth_code_expires) VALUES (:sessionId, :authCode, :authCodeExpires)', 
+            $st = $db->query('INSERT INTO _oauth_session_authcodes (session_id, auth_code, auth_code_expires) VALUES (:sessionId, :authCode, :authCodeExpires)',
                 null, [':sessionId'=>$sessionId, ':authCode'=>$authCode, ':authCodeExpires'=>$expireTime]);
+
             return $st ? $db->lastInsertId() : false;
         }
 
@@ -225,7 +234,8 @@ namespace Gini\OAuth\Storage {
          * @param  int    $sessionId   The session ID
          * @return void
          */
-        public function removeAuthCode($sessionId) {
+        public function removeAuthCode($sessionId)
+        {
             $db = $this->_db;
             $db->query('DELETE FROM _oauth_session_authcodes WHERE session_id = :sessionId',
                  null, [':sessionId'=>$sessionId]);
@@ -259,7 +269,8 @@ namespace Gini\OAuth\Storage {
          * @param  string     $authCode    The authorization code
          * @return array|bool              False if invalid or array as above
          */
-        public function validateAuthCode($clientId, $redirectUri, $authCode) {
+        public function validateAuthCode($clientId, $redirectUri, $authCode)
+        {
             $db = $this->_db;
             $st = $db->query('SELECT os.id AS session_id, osa.id AS authcode_id FROM _oauth_sessions AS os JOIN _oauth_session_authcodes AS osa ON osa.session_id = os.id JOIN _oauth_session_redirects AS osr ON osr.session_id = os.id WHERE os.client_id = :clientId AND osa.auth_code = :authCode AND osa.auth_code_expires >= UNIX_TIMESTAMP(NOW()) AND osr.redirect_uri = :redirectUri',
                  null, [':clientId'=>$clientId, ':redirectUri'=>$redirectUri, ':authCode'=>$authCode]
@@ -287,9 +298,9 @@ namespace Gini\OAuth\Storage {
          *
          * <code>
          * array(
-         *     'session_id' =>  (int),
-         *     'client_id'  =>  (string),
-         *     'owner_id'   =>  (string),
+         *     'session_id' =>  (int) ,
+         *     'client_id'  =>  (string) ,
+         *     'owner_id'   =>  (string) ,
          *     'owner_type' =>  (string)
          * )
          * </code>
@@ -297,7 +308,8 @@ namespace Gini\OAuth\Storage {
          * @param  string     $accessToken The access token
          * @return array|bool              False if invalid or an array as above
          */
-        public function validateAccessToken($accessToken) {
+        public function validateAccessToken($accessToken)
+        {
             $db = $this->_db;
             $st = $db->query('SELECT osat.session_id, os.client_id, os.owner_id, os.owner_type FROM _oauth_session_access_tokens AS osat JOIN _oauth_sessions AS os ON os.id = osat.session_id WHERE osat.access_token = :accessToken AND osat.access_token_expires >= UNIX_TIMESTAMP(NOW())',
                  null, [':accessToken'=>$accessToken]
@@ -322,7 +334,8 @@ namespace Gini\OAuth\Storage {
          * @param  string $refreshToken The refresh token to be removed
          * @return void
          */
-        public function removeRefreshToken($refreshToken) {
+        public function removeRefreshToken($refreshToken)
+        {
             $db = $this->_db;
             $db->query('DELETE FROM _oauth_session_refresh_tokens WHERE refresh_token = :refreshToken',
                  null, [':refreshToken'=>$refreshToken]);
@@ -342,10 +355,12 @@ namespace Gini\OAuth\Storage {
          * @param  string   $clientId     The client ID
          * @return int|bool               The ID of the access token the refresh token is linked to (or false if invalid)
          */
-        public function validateRefreshToken($refreshToken, $clientId) {
+        public function validateRefreshToken($refreshToken, $clientId)
+        {
             $db = $this->_db;
-            $st = $db->query('SELECT session_access_token_id FROM _oauth_session_refresh_tokens WHERE refresh_token = :refreshToken AND refresh_token_expires >= UNIX_TIMESTAMP(NOW()) AND client_id = :clientId', 
+            $st = $db->query('SELECT session_access_token_id FROM _oauth_session_refresh_tokens WHERE refresh_token = :refreshToken AND refresh_token_expires >= UNIX_TIMESTAMP(NOW()) AND client_id = :clientId',
                 null, [':refreshToken'=>$refreshToken, ':clientId'=>$clientId]);
+
             return $st ? $st->value() : false;
         }
 
@@ -362,9 +377,9 @@ namespace Gini\OAuth\Storage {
          *
          * <code>
          * array(
-         *     'id' =>  (int),
-         *     'session_id' =>  (int),
-         *     'access_token'   =>  (string),
+         *     'id' =>  (int) ,
+         *     'session_id' =>  (int) ,
+         *     'access_token'   =>  (string) ,
          *     'access_token_expires'   =>  (int)
          * )
          * </code>
@@ -372,7 +387,8 @@ namespace Gini\OAuth\Storage {
          * @param  int    $accessTokenId The access token ID
          * @return array
          */
-        public function getAccessToken($accessTokenId) {
+        public function getAccessToken($accessTokenId)
+        {
             $db = $this->_db;
             $st = $db->query('SELECT * FROM _oauth_session_access_tokens WHERE id = :accessTokenId',
                  null, [':accessTokenId'=>$accessTokenId]
@@ -399,7 +415,8 @@ namespace Gini\OAuth\Storage {
          * @param  int $scopeId    The scope ID
          * @return void
          */
-        public function associateAuthCodeScope($authCodeId, $scopeId) {
+        public function associateAuthCodeScope($authCodeId, $scopeId)
+        {
             $db = $this->_db;
             $db->query('INSERT INTO _oauth_session_authcode_scopes (oauth_session_authcode_id, scope_id) VALUES (:authCodeId, :scopeId)',
                  null, [':authCodeId'=>$authCodeId, ':scopeId'=>$scopeId]
@@ -432,7 +449,8 @@ namespace Gini\OAuth\Storage {
          * @param  int   $oauthSessionAuthCodeId The session ID
          * @return array
          */
-        public function getAuthCodeScopes($oauthSessionAuthCodeId) {
+        public function getAuthCodeScopes($oauthSessionAuthCodeId)
+        {
             $db = $this->_db;
             $st = $db->query('SELECT scope_id FROM _oauth_session_authcode_scopes WHERE oauth_session_authcode_id = :authCodeId',
                  null, [':authCodeId'=>$oauthSessionAuthCodeId]
@@ -454,7 +472,8 @@ namespace Gini\OAuth\Storage {
          * @param  int    $scopeId       The ID of the scope
          * @return void
          */
-        public function associateScope($accessTokenId, $scopeId) {
+        public function associateScope($accessTokenId, $scopeId)
+        {
             $db = $this->_db;
             $db->query('INSERT INTO _oauth_session_token_scopes (session_access_token_id, scope_id) VALUE (:accessTokenId, :scopeId)',
                  null, [':accessTokenId'=>$accessTokenId, ':scopeId'=>$scopeId]
@@ -478,9 +497,9 @@ namespace Gini\OAuth\Storage {
          * <code>
          * array (
          *     array(
-         *         'id'     =>  (int),
-         *         'scope'  =>  (string),
-         *         'name'   =>  (string),
+         *         'id'     =>  (int) ,
+         *         'scope'  =>  (string) ,
+         *         'name'   =>  (string) ,
          *         'description'    =>  (string)
          *     ),
          *     ...
@@ -491,7 +510,8 @@ namespace Gini\OAuth\Storage {
          * @param  string $accessToken The access token
          * @return array
          */
-        public function getScopes($accessToken) {
+        public function getScopes($accessToken)
+        {
             $db = $this->_db;
             $st = $db->query('SELECT os.* FROM _oauth_session_token_scopes AS osts JOIN _oauth_session_access_tokens AS osat ON osat.id = osts.session_access_token_id JOIN _oauth_scopes AS os ON os.id = osts.scope_id WHERE osat.access_token = :accessToken',
                  null, [':accessToken'=>$accessToken]
@@ -526,7 +546,8 @@ namespace Gini\OAuth\Storage {
          * @param  string     $grantType The grant type used in the request (default = "null")
          * @return bool|array If the scope doesn't exist return false
          */
-        public function getScope($scope, $clientId = null, $grantType = null) {
+        public function getScope($scope, $clientId = null, $grantType = null)
+        {
             $db = $this->_db;
             $st = $db->query('SELECT * FROM _oauth_scopes WHERE scope = :scope',
                  null, [':scope'=>$scope]
@@ -536,5 +557,5 @@ namespace Gini\OAuth\Storage {
         }
 
     }
-    
+
 }

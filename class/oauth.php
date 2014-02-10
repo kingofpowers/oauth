@@ -1,9 +1,11 @@
 <?php
 
-class OAuth {
-
-    static function setup() {
-		require_once(__DIR__.'/../vendor/autoload.php');
+class OAuth
+{
+    public static function setup()
+    {
+        $composer_path = \Gini\Core::locateFile('vendor/autoload.php', 'oauth');
+        if ($composer_path) require_once $composer_path;
     }
-    
+
 }

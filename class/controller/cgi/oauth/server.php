@@ -1,17 +1,15 @@
 <?php
 
 // It's just a sample server controller, please override it.
-
 namespace Controller\CGI\OAuth;
 
-class Server extends \Controller\CGI {
-
-    function actionAuth() {
-
+class Server extends \Controller\CGI
+{
+    public function actionAuth()
+    {
         $form = $this->form();
-        
+
         $server = \Gini\IoC::construct('\Gini\OAuth\Authorization');
-        
         if (!$server->isValid()) return false;
 
         // check if user is logged in?
@@ -24,11 +22,10 @@ class Server extends \Controller\CGI {
             if ($form['authorize']) {
                 // Generate an authorization code
                 $url = $server->authorize(\Gini\Auth::userName());
-            }
-            else {
+            } else {
                 $url = $server->deny();
             }
-            $this->redirect($url); 
+            $this->redirect($url);
         }
 
         return \Gini\IoC::construct('\Gini\CGI\Response\HTML', V('phtml/oauth/authorize', [
@@ -37,24 +34,29 @@ class Server extends \Controller\CGI {
         ]));
     }
 
-    function actionToken() {
+    public function actionToken()
+    {
         $server = \Gini\IoC::construct('\Gini\OAuth\Authorization');
         $response = $server->issueAccessToken();
+
         return \Gini\IoC::construct('\Gini\CGI\Response\JSON', $response);
     }
 
-    function actionUser() {
+    public function actionUser()
+    {
         $resource = \Gini\IoC::construct('\Gini\OAuth\Resource', $_GET['access_token']);
         if ($resource->isValid()) {
             $username = $resource->getUserName();
             $user = a('user', ['username'=>$username]);
+
             return \Gini\IoC::construct('\Gini\CGI\Response\JSON', [
                  'username' => $username,
                  'name' => $user->name,
                  'email' => $user->email,
             ]);
         }
+
         return false;
     }
-    
+
 }
