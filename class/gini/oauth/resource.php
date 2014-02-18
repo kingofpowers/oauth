@@ -12,9 +12,11 @@ namespace Gini\OAuth {
             // $_GET, $_POST, $_COOKIE, $_FILES, $_SERVER
             $request = new \League\OAuth2\Server\Util\Request(['access_token'=>$access_token], [], [], [], ['REQUEST_METHOD'=>'GET']);
 
-            $server = new \League\OAuth2\Server\Resource(
-                \Gini\IoC::construct('\Gini\OAuth\Storage\Database')
-            );
+            $storageConfig = (array) \Gini\Config::get('oauth.server')['storage'];
+            $sessionBackend = $storageConfig['session'] ?: $storageConfig['default'] ?: 'database';
+            $session = \Gini\IoC::construct('\Gini\OAuth\Storage\\'.$sessionBackend);
+
+            $server = new \League\OAuth2\Server\Resource($session);
 
             $server->setRequest($request);
 

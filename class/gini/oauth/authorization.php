@@ -11,7 +11,19 @@ namespace Gini\OAuth {
         {
             $db = \Gini\IoC::construct('\Gini\OAuth\Storage\Database');
 
-            $server = new \League\OAuth2\Server\Authorization($db, $db, $db);
+            // ClientInterface $client, SessionInterface $session, ScopeInterface $scope
+            $storageConfig = (array) \Gini\Config::get('oauth.server')['storage'];
+
+            $sessionBackend = $storageConfig['session'] ?: $storageConfig['default'] ?: 'database';
+            $session = \Gini\IoC::construct('\Gini\OAuth\Storage\\'.$sessionBackend);
+
+            $clientBackend = $storageConfig['client'] ?: $storageConfig['default'] ?: 'database';
+            $client = \Gini\IoC::construct('\Gini\OAuth\Storage\\'.$clientBackend);
+
+            $scopeBackend = $storageConfig['scope'] ?: $storageConfig['default'] ?: 'database';
+            $scope = \Gini\IoC::construct('\Gini\OAuth\Storage\\'.$scopeBackend);
+
+            $server = new \League\OAuth2\Server\Authorization($client, $session, $scope);
             $server->addGrantType(new \League\OAuth2\Server\Grant\AuthCode);
 
             $this->_server = $server;
