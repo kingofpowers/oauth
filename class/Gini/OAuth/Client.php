@@ -12,6 +12,7 @@ namespace Gini\OAuth {
         function __construct($source)
         {
             $this->_source = $source;
+            list($source_name,) = explode('/', $source);
 
             if (isset($_SESSION['oauth.client.token'][$source])) {
                 $token = $_SESSION['oauth.client.token'][$source];
@@ -21,7 +22,7 @@ namespace Gini\OAuth {
                 }
             }
 
-            $options = (array) \Gini\Config::get('oauth.client')['servers'][$source];
+            $options = (array) \Gini\Config::get('oauth.client')['servers'][$source_name];
 
             $driver_class = '\Gini\OAuth\Client\\'.($options['driver']?:'Unknown');
 
