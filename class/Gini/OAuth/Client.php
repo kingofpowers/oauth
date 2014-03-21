@@ -13,6 +13,7 @@ namespace Gini\OAuth {
         {
             $this->_source = $source;
             list($source_name,) = explode('/', $source);
+            $this->_source_name = $source_name;
 
             if (isset($_SESSION['oauth.client.token'][$source])) {
                 $token = $_SESSION['oauth.client.token'][$source];
@@ -47,9 +48,9 @@ namespace Gini\OAuth {
             list($username, $backend) = \Gini\Auth::parseUserName($uid);
 
             if ($backend) {
-                $backend .= '%' . $this->_source;
+                $backend .= '%' . $this->_source_name;
             } else {
-                $backend = $this->_source;
+                $backend = $this->_source_name;
             }
 
             return \Gini\Auth::makeUserName($username, $backend);
