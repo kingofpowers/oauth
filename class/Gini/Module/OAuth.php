@@ -1,5 +1,7 @@
 <?php
 
+namespace Gini\Module;
+
 class OAuth
 {
     public static function setup()
