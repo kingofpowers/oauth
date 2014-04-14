@@ -1,9 +1,9 @@
 <?php
 
 // It's just a sample server controller, please override it.
-namespace Controller\CGI\OAuth;
+namespace Gini\Controller\CGI\OAuth;
 
-class Server extends \Controller\CGI
+class Server extends \Gini\Controller\CGI
 {
     public function actionAuth()
     {

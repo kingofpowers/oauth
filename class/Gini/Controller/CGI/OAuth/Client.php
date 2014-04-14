@@ -1,8 +1,8 @@
 <?php
 
-namespace Controller\CGI\OAuth;
+namespace Gini\Controller\CGI\OAuth;
 
-class Client extends \Controller\CGI
+class Client extends \Gini\Controller\CGI
 {
     private $_client;
 

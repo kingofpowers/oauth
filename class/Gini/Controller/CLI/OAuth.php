@@ -1,8 +1,8 @@
 <?php
 
-namespace Controller\CLI {
+namespace Gini\Controller\CLI {
 
-    class OAuth extends \Controller\CLI
+    class OAuth extends \Gini\Controller\CLI
     {
         function actionPrepare($args)
         {
