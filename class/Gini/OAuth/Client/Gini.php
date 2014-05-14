@@ -2,11 +2,11 @@
 
 namespace Gini\OAuth\Client {
 
-    use \League\OAuth2\Client\Provider\IdentityProvider;
+    use \League\OAuth2\Client\Provider\AbstractProvider;
     use \League\OAuth2\Client\Provider\User;
     use \League\OAuth2\Client\Token\AccessToken;
 
-    class Gini extends IdentityProvider
+    class Gini extends AbstractProvider
     {
         public $scopes = ['user'];
         public $responseType = 'json';
