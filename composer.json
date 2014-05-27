@@ -1,6 +1,15 @@
 {
     "name": "iamfat/oauth",
     "description": "OAuth",
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "http://satis.genee.cn"
+        },
+        {
+            "packagist": false
+        }
+    ],
     "require": {
         "league/oauth2-client": "dev-master",
         "league/oauth2-server": "3.*"
