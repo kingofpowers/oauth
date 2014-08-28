@@ -127,7 +127,7 @@ namespace Gini\OAuth\Storage {
         public function deleteSession($clientId, $ownerType, $ownerId)
         {
             $db = $this->_db;
-            $db->query('DELETE FROM _oauth_sessions WHERE client_id=:clientId AND owner_type=:ownerType AND owner_id=:ownerId)',
+            $db->query('DELETE FROM _oauth_sessions WHERE client_id=:clientId AND owner_type=:ownerType AND owner_id=:ownerId',
                 null, [':clientId'=>$clientId, ':ownerType'=>$ownerType, ':ownerId'=>$ownerId]);
         }
 
