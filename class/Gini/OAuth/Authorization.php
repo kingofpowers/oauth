@@ -9,8 +9,6 @@ namespace Gini\OAuth {
 
         function __construct()
         {
-            $db = \Gini\IoC::construct('\Gini\OAuth\Storage\Database');
-
             // ClientInterface $client, SessionInterface $session, ScopeInterface $scope
             $storageConfig = (array) \Gini\Config::get('oauth.server')['storage'];
 
