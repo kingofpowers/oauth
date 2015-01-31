@@ -4,8 +4,6 @@ namespace Gini\Controller\CGI\OAuth;
 
 class Client extends \Gini\Controller\CGI
 {
-    private $_client;
-
     public function actionAuth()
     {
         $form = $this->form();
