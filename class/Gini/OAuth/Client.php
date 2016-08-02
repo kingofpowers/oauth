@@ -89,6 +89,11 @@ namespace Gini\OAuth {
             }
         }
 
+        public function getAccessToken()
+        {
+            return $this->_token;
+        }
+
         function fetchAccessToken($grant = 'authorization_code', $params = [])
         {
             try {
