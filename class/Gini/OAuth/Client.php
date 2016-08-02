@@ -61,6 +61,34 @@ namespace Gini\OAuth {
             $this->_driver->authorize();
         }
 
+        public function getUserUid()
+        {
+            if ($this->_token) {
+                return $this->_driver->getUserUid($this->_token);
+            }
+        }
+
+        public function getUserDetails()
+        {
+            if ($this->_token) {
+                return $this->_driver->getUserDetails($this->_token);
+            }
+        }
+
+        public function getUserEmail()
+        {
+            if ($this->_token) {
+                return $this->_driver->getUserEmail($this->_token);
+            }
+        }
+
+        public function getUserScreenName()
+        {
+            if ($this->_token) {
+                return $this->_driver->getUserScreenName($this->_token);
+            }
+        }
+
         function fetchAccessToken($grant = 'authorization_code', $params = [])
         {
             try {
