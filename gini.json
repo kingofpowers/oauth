@@ -2,7 +2,7 @@
     "id": "oauth",
     "name": "OAuth Support",
     "description": "OAuth2 Support",
-    "version": "0.2.4",
+    "version": "0.2.5",
     "build": {
         "copy": [
             "vendor",
@@ -18,5 +18,6 @@
             "league/oauth2-client": "0.7.*",
             "league/oauth2-server": "3.*"
         }
-    }
+    },
+    "moduleClass": "\\Gini\\Module\\oauth"
 }
