@@ -10,8 +10,8 @@
         ]
     },
     "dependencies": {
-        "gini": ">=0.5.0",
-        "auth": "0.1.4"
+        "gini": ">=1.11.0",
+        "auth": "*"
     },
     "composer": {
         "require": {
