@@ -28,7 +28,8 @@ class Server extends \Gini\Controller\CGI
             $this->redirect($url);
         }
 
-        return \Gini\IoC::construct('\Gini\CGI\Response\HTML', V('phtml/oauth/authorize', [
+        $viewName = \Gini\Config::get('oauth.auth_view') ?: 'oauth/authorize';
+        return \Gini\IoC::construct('\Gini\CGI\Response\HTML', V($viewName, [
             'form' => $form,
             'client' => $server->clientDetails()
         ]));
