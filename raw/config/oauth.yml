@@ -2,4 +2,8 @@
 server:
   storage:
     default: database
+client:
+  session_key:
+    token: '#oauth.client.token'
+    redirect_uri: '#oauth.client.redirect_uri'
 ...

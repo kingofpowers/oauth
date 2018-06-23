@@ -9,16 +9,18 @@ namespace Gini\OAuth {
 
         private $_driver;
 
-        function __construct($source)
+        public function __construct($source)
         {
             $this->_source = $source;
-            list($source_name,) = explode('/', $source);
+            list($source_name, ) = explode('/', $source);
             $this->_source_name = $source_name;
 
-            if (isset($_SESSION['oauth.client.token'][$source])) {
-                $token = $_SESSION['oauth.client.token'][$source];
+            $sessionKeyForToken =
+                \Gini\Config::get('oauth.client')['session_key']['token'];
+            if (isset($_SESSION[$sessionKeyForToken][$source])) {
+                $token = $_SESSION[$sessionKeyForToken][$source];
                 // \Gini\Logger::of('oauth')->error('invalid token: {error}!', ['error' => $token['error']]);
-                   if (!isset($token['error'])) {
+                if (!isset($token['error'])) {
                     $this->_token = new \League\OAuth2\Client\Token\AccessToken($token);
                 }
             }
@@ -35,7 +37,7 @@ namespace Gini\OAuth {
             ]);
         }
 
-        function getUserName()
+        public function getUserName()
         {
             if (!$this->_token) {
                 \Gini\CGI::redirect('oauth/client/auth', [
@@ -56,7 +58,7 @@ namespace Gini\OAuth {
             return \Gini\Auth::makeUserName($username, $backend);
         }
 
-        function authorize()
+        public function authorize()
         {
             $this->_driver->authorize();
         }
@@ -94,11 +96,13 @@ namespace Gini\OAuth {
             return $this->_token;
         }
 
-        function fetchAccessToken($grant = 'authorization_code', $params = [])
+        public function fetchAccessToken($grant = 'authorization_code', $params = [])
         {
+            $sessionKeyForToken =
+                \Gini\Config::get('oauth.client')['session_key']['token'];
             try {
                 $this->_token = $this->_driver->getAccessToken($grant, $params);
-                $_SESSION['oauth.client.token'][$this->_source] = [
+                $_SESSION[$sessionKeyForToken][$this->_source] = [
                     'access_token' => $this->_token->accessToken,
                     'refresh_token' => $this->_token->refreshToken,
                     'expires' => $this->_token->expires,
@@ -106,12 +110,11 @@ namespace Gini\OAuth {
                 ];
             } catch (Exception $e) {
                 $this->_token = null;
-                $_SESSION['oauth.client.token'][$this->_source] = [
+                $_SESSION[$sessionKeyForToken][$this->_source] = [
                     'error' => $e->getMessage()
                 ];
             }
         }
-
     }
 
 }
