@@ -10,7 +10,9 @@ class Server extends \Gini\Controller\CGI
         $form = $this->form();
 
         $server = \Gini\IoC::construct('\Gini\OAuth\Authorization');
-        if (!$server->isValid()) return false;
+        if (!$server->isValid()) {
+            return false;
+        }
 
         // check if user is logged in?
         if (!\Gini\Auth::isLoggedIn()) {
@@ -59,5 +61,4 @@ class Server extends \Gini\Controller\CGI
 
         return false;
     }
-
 }

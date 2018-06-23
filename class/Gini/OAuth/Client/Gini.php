@@ -51,7 +51,6 @@ namespace Gini\OAuth\Client {
         {
             return $response->name;
         }
-
     }
 
 }

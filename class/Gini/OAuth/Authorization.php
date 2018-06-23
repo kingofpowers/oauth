@@ -7,7 +7,7 @@ namespace Gini\OAuth {
         private $_server;
         private $_params;
 
-        function __construct()
+        public function __construct()
         {
             // ClientInterface $client, SessionInterface $session, ScopeInterface $scope
             $storageConfig = (array) \Gini\Config::get('oauth.server')['storage'];
@@ -25,10 +25,9 @@ namespace Gini\OAuth {
             $server->addGrantType(new \League\OAuth2\Server\Grant\AuthCode);
 
             $this->_server = $server;
-
         }
 
-        function isValid()
+        public function isValid()
         {
             $server = $this->_server;
 
@@ -48,12 +47,12 @@ namespace Gini\OAuth {
             return true;
         }
 
-        function clientDetails()
+        public function clientDetails()
         {
             return $this->_params['client_details'];
         }
 
-        function authorize($username)
+        public function authorize($username)
         {
             $server = $this->_server;
 
@@ -69,10 +68,9 @@ namespace Gini\OAuth {
                     'state' =>  isset($this->_params['state']) ? $this->_params['state'] : ''
                 ]
             );
-
         }
 
-        function deny()
+        public function deny()
         {
             $server = $this->_server;
 
@@ -86,7 +84,7 @@ namespace Gini\OAuth {
             );
         }
 
-        function issueAccessToken()
+        public function issueAccessToken()
         {
             $server = $this->_server;
 
@@ -98,7 +96,6 @@ namespace Gini\OAuth {
             }
             // Throw an exception because there was a problem with the client's request
             catch (\League\OAuth2\Server\Exception\ClientException $e) {
-
                 $response = array(
                     'error' =>  $server::getExceptionType($e->getCode()),
                     'error_description' => $e->getMessage()
@@ -108,11 +105,9 @@ namespace Gini\OAuth {
                 header($server::getExceptionHttpHeaders(
                     $server::getExceptionType($e->getCode())
                 ));
-
             }
             // Throw an error when a non-library specific exception has been thrown
             catch (Exception $e) {
-
                 $response = array(
                     'error' =>  'undefined_error',
                     'error_description' => $e->getMessage()
@@ -121,7 +116,6 @@ namespace Gini\OAuth {
 
             return $response;
         }
-
     }
 
 }

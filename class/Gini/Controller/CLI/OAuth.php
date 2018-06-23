@@ -4,10 +4,9 @@ namespace Gini\Controller\CLI {
 
     class OAuth extends \Gini\Controller\CLI
     {
-        function actionPrepare($args)
+        public function actionPrepare($args)
         {
         }
-
     }
 
 }

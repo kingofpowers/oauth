@@ -7,7 +7,7 @@ namespace Gini\OAuth {
         private $_isValid;
         private $_server;
 
-        function __construct($access_token)
+        public function __construct($access_token)
         {
             // $_GET, $_POST, $_COOKIE, $_FILES, $_SERVER
             $request = new \League\OAuth2\Server\Util\Request(['access_token'=>$access_token], [], [], [], ['REQUEST_METHOD'=>'GET']);
@@ -30,21 +30,20 @@ namespace Gini\OAuth {
             $this->_server = $server;
         }
 
-        function isValid()
+        public function isValid()
         {
             return $this->_isValid;
         }
 
-        function getUserName()
+        public function getUserName()
         {
             return $this->isValid() ? $this->_server->getOwnerId() : false;
         }
 
-        function hasScope($scope)
+        public function hasScope($scope)
         {
             return $this->_server->hasScope($scope);
         }
-
     }
 
 }
