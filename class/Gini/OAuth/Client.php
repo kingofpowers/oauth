@@ -25,6 +25,15 @@ namespace Gini\OAuth {
                 }
             }
 
+            $authUri = \Gini\Config::get('oauth.auth_uri') ?: 'oauth/client/auth';
+
+            if (!$this->_token) {
+                \Gini\CGI::redirect($authUri, [
+                    'source' => $this->_source,
+                    'redirect_uri' => URL('', $_GET)
+                ]);
+            }
+
             $options = (array) \Gini\Config::get('oauth.client')['servers'][$source_name];
 
             $driver_class = '\Gini\OAuth\Client\\'.($options['driver']?:'Unknown');
@@ -32,30 +41,25 @@ namespace Gini\OAuth {
             $this->_driver = \Gini\IoC::construct($driver_class, [
                 'clientId' => $options['client_id'],
                 'clientSecret' => $options['client_secret'],
-                'redirectUri' => URL('oauth/client/auth', ['source'=>$source]),
+                'redirectUri' => URL($authUri, ['source' => $source]),
                 'options' => $options
             ]);
         }
 
         public function getUserName()
         {
-            if (!$this->_token) {
-                \Gini\CGI::redirect('oauth/client/auth', [
-                    'source' => $this->_source,
-                    'redirect_uri' => URL('', $_GET)
-                ]);
+            if ($this->_token) {
+                $uid = $this->_driver->getUserUid($this->_token);
+                list($username, $backend) = \Gini\Auth::parseUserName($uid);
+
+                if ($backend) {
+                    $backend .= '%' . $this->_source_name;
+                } else {
+                    $backend = $this->_source_name;
+                }
+
+                return \Gini\Auth::makeUserName($username, $backend);
             }
-
-            $uid = $this->_driver->getUserUid($this->_token);
-            list($username, $backend) = \Gini\Auth::parseUserName($uid);
-
-            if ($backend) {
-                $backend .= '%' . $this->_source_name;
-            } else {
-                $backend = $this->_source_name;
-            }
-
-            return \Gini\Auth::makeUserName($username, $backend);
         }
 
         public function authorize()
