@@ -27,7 +27,7 @@ namespace Gini\OAuth {
 
             $authUri = \Gini\Config::get('oauth.client')['auth_uri'] ?: 'oauth/client/auth';
 
-            if (!$this->_token) {
+            if (!$this->_token && \Gini\CGI::route() != $authUri) {
                 \Gini\CGI::redirect($authUri, [
                     'source' => $this->_source,
                     'redirect_uri' => URL('', $_GET)
