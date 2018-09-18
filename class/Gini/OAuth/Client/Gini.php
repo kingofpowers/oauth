@@ -3,7 +3,6 @@
 namespace Gini\OAuth\Client {
 
     use \League\OAuth2\Client\Provider\AbstractProvider;
-    use \League\OAuth2\Client\Provider\User;
     use \League\OAuth2\Client\Token\AccessToken;
 
     class Gini extends AbstractProvider
@@ -29,12 +28,11 @@ namespace Gini\OAuth\Client {
 
         public function userDetails($response, AccessToken $token)
         {
-            $user = new User;
-            $user->username = $response->username;
-            $user->name = $response->name;
-            $user->email = $response->email;
-
-            return $user;
+            return [
+                'username' => $response->username,
+                'email' => $response->email,
+                'name' => $response->name
+            ];
         }
 
         public function userUid($response, AccessToken $token)

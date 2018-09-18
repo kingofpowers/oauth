@@ -112,7 +112,7 @@ namespace Gini\OAuth {
                     'expires' => $this->_token->expires,
                     'uid' => $this->uid,
                 ];
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 $this->_token = null;
                 $_SESSION[$sessionKeyForToken][$this->_source] = [
                     'error' => $e->getMessage()

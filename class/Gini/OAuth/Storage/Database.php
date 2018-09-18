@@ -396,7 +396,7 @@ namespace Gini\OAuth\Storage {
                 [':refreshToken'=>$refreshToken, ':clientId'=>$clientId]
             );
 
-            return $st ? $st->value() : false;
+            return ($st && $st->count() > 0) ? $st->value() : false;
         }
 
         /**
@@ -497,7 +497,7 @@ namespace Gini\OAuth\Storage {
                 [':authCodeId'=>$oauthSessionAuthCodeId]
              );
 
-            return $st ? $st->rows(\PDO::FETCH_ASSOC) : [];
+            return ($st && $st->count() > 0) ? $st->rows(\PDO::FETCH_ASSOC) : [];
         }
 
         /**
@@ -562,7 +562,7 @@ namespace Gini\OAuth\Storage {
                 [':accessToken'=>$accessToken]
              );
 
-            return $st ? $st->rows(\PDO::FETCH_ASSOC) : [];
+            return ($st && $st->count() > 0) ? $st->rows(\PDO::FETCH_ASSOC) : [];
         }
 
         /**
@@ -600,7 +600,7 @@ namespace Gini\OAuth\Storage {
                 [':scope'=>$scope]
              );
 
-            return $st ? $st->row(\PDO::FETCH_ASSOC) : false;
+            return ($st && $st->count() > 0) ? $st->row(\PDO::FETCH_ASSOC) : false;
         }
     }
 
