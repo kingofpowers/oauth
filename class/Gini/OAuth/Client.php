@@ -124,7 +124,7 @@ namespace Gini\OAuth {
                     'access_token' => $this->_token->accessToken,
                     'refresh_token' => $this->_token->refreshToken,
                     'expires' => $this->_token->expires,
-                    'uid' => $this->uid,
+                    'uid' => $this->_token->uid,
                 ];
             } catch (\Exception $e) {
                 $this->_token = null;
