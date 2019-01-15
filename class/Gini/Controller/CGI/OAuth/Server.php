@@ -33,7 +33,7 @@ class Server extends \Gini\Controller\CGI
         $viewName = \Gini\Config::get('oauth.auth_view') ?: 'oauth/authorize';
         return \Gini\IoC::construct('\Gini\CGI\Response\HTML', V($viewName, [
             'form' => $form,
-            'client' => $server->clientDetails()
+            'client' => $server->clientDetails(),
         ]));
     }
 
@@ -50,12 +50,25 @@ class Server extends \Gini\Controller\CGI
         $resource = \Gini\IoC::construct('\Gini\OAuth\Resource', $_GET['access_token']);
         if ($resource->isValid()) {
             $username = $resource->getUserName();
-            $user = a('user', ['username'=>$username]);
+            $user = a('user', ['username' => $username]);
 
             return \Gini\IoC::construct('\Gini\CGI\Response\JSON', [
-                 'username' => $username,
-                 'name' => $user->name,
-                 'email' => $user->email,
+                'username' => $username,
+                'name' => $user->name,
+                'email' => $user->email,
+            ]);
+        }
+
+        return false;
+    }
+
+    public function actionOwner()
+    {
+        $resource = \Gini\IoC::construct('\Gini\OAuth\Resource', $_GET['access_token']);
+        if ($resource->isValid()) {
+            return \Gini\IoC::construct('\Gini\CGI\Response\JSON', [
+                'owner_type' => $resource->getOwnerType(),
+                'owner_id' => $resource->getOwnerId(),
             ]);
         }
 
