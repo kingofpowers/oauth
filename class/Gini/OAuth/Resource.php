@@ -50,7 +50,7 @@ namespace Gini\OAuth {
 
         public function hasScope($scope)
         {
-            return $this->_server->hasScope($scope);
+            return $this->isValid() ? $this->_server->hasScope($scope) : false;
         }
     }
 
