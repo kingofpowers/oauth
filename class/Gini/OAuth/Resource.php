@@ -37,6 +37,14 @@ namespace Gini\OAuth {
 
         public function getUserName()
         {
+            return $this->isValid() && $this->_server->getOwnerType() == 'user' ? $this->_server->getOwnerId() : false;
+        }
+
+        public function getOwnerType() {
+            return $this->isValid() ? $this->_server->getOwnerType() : false;
+        }
+
+        public function getOwnerId() {
             return $this->isValid() ? $this->_server->getOwnerId() : false;
         }
 

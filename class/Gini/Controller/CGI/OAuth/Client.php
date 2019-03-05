@@ -23,10 +23,8 @@ class Client extends \Gini\Controller\CGI
             $client->fetchAccessToken('authorization_code', ['code'=>$form['code']]);
         } else {
             // start oauth process...
-
             $_SESSION[$sessionKeyForRedirectUri][$source] = $form['redirect_uri'] ?: '/';
             $client->authorize();
-
             return;
         }
 
