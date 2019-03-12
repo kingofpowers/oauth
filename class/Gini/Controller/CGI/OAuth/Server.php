@@ -23,7 +23,7 @@ class Server extends \Gini\Controller\CGI
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if ($form['authorize']) {
                 // Generate an authorization code
-                $url = $server->authorize(\Gini\Auth::userName());
+                $url = $server->authorize(\Gini\Auth::userName(), 'user');
             } else {
                 $url = $server->deny();
             }
