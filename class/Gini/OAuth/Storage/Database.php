@@ -208,6 +208,16 @@ namespace Gini\OAuth\Storage {
             return ($st && $st->count() > 0) ? $st->value() : false;
         }
 
+        public function setRefreshTokenExpireTime($refreshToken, $clientId, $expireTime)
+        {
+            $db = $this->_db;
+            $st = $db->query(
+                'UPDATE _oauth_session_refresh_tokens SET refresh_token_expires=:expireTime WHERE refresh_token = :refreshToken AND refresh_token_expires >= UNIX_TIMESTAMP(NOW()) AND client_id = :clientId',
+                null,
+                [':expireTime' => $expireTime, ':refreshToken' => $refreshToken, ':clientId' => $clientId]
+            );
+        }
+
         public function getAccessToken($accessTokenId)
         {
             $db = $this->_db;
