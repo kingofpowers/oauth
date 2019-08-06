@@ -208,7 +208,7 @@ namespace Gini\OAuth\Storage {
             return ($st && $st->count() > 0) ? $st->value() : false;
         }
 
-        public function extendRefreshToken($refreshToken, $clientId, $expireTime)
+        public function setRefreshTokenExpireTime($refreshToken, $clientId, $expireTime)
         {
             $db = $this->_db;
             $st = $db->query(

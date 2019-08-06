@@ -111,12 +111,9 @@ namespace Gini\OAuth {
             return $response;
         }
 
-        public function extendRefreshToken($params = null)
+        public function setRefreshTokenTTL($refresh_token,$client_id,$ttl_time)
         {
-            if (!is_array($params)) {
-                $params = $_POST;
-            }
-            $this->_session->extendRefreshToken($params['refresh_token'], $params['client_id'], time()+$params['ttl']);
+            $this->_session->setRefreshTokenExpireTime($refresh_token, $client_id, time()+$ttl_time);
             return true;
         }
     }
