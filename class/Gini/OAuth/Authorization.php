@@ -111,11 +111,10 @@ namespace Gini\OAuth {
             return $response;
         }
 
-        public function setRefreshTokenTTL($refresh_token,$client_id,$ttl_time)
+        public function setRefreshTokenExpireTime($refresh_token,$client_id,$expireTime)
         {
-            $expireTime = time()+$ttl_time;
             $this->_session->setRefreshTokenExpireTime($refresh_token, $client_id, $expireTime);
-            return $expireTime;
+            return true;
         }
     }
 }
