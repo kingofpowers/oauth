@@ -46,14 +46,14 @@ namespace Gini\OAuth {
             return $this->_params['client_details'];
         }
 
-        public function authorize($username)
+        public function authorize($username,$scope = 'user')
         {
             $server = $this->handle();
             $server->addGrantType(new \League\OAuth2\Server\Grant\AuthCode);
             // Generate an authorization code
             $code
                 = $server->getGrantType('authorization_code')
-                ->newAuthoriseRequest('user', $username, $this->_params);
+                ->newAuthoriseRequest($scope, $username, $this->_params);
             return \League\OAuth2\Server\Util\RedirectUri::make(
                 $this->_params['redirect_uri'],
                 [
