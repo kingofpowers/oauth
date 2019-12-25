@@ -92,7 +92,8 @@ namespace Gini\OAuth {
             }
         }
 
-        public function tryRedirect($try_redirect=true) {
+        public function tryRedirect($try_redirect=true)
+        {
             $this->_try_redirect = !!$try_redirect;
             return $this;
         }
