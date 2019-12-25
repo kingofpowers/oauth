@@ -51,7 +51,7 @@ namespace Gini\OAuth\Storage {
         {
             $db = $this->_db;
             $st = $db->query(
-                'INSERT INTO _oauth_sessions (client_id, owner_type, owner_id, group) VALUES (:clientId, :ownerType, :ownerId, :group)',
+                'INSERT INTO _oauth_sessions (client_id, owner_type, owner_id, "group") VALUES (:clientId, :ownerType, :ownerId, :group)',
                 null,
                 [
                     ':clientId' => $clientId, ':group' => \Gini\Session::id(),
