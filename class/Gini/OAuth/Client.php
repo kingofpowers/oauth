@@ -38,9 +38,11 @@ namespace Gini\OAuth {
             ]);
         }
 
-        public function authorize()
-        {
-            $this->_driver->authorize();
+        public function authorize(
+            array $options = [],
+            callable $redirectHandler = null
+        ) {
+            $this->_driver->authorize($options, $redirectHandler);
         }
 
         public function tryRedirect($try_redirect = true)
@@ -49,15 +51,16 @@ namespace Gini\OAuth {
             return $this;
         }
 
-        public function getAccessToken()
+        public function getAccessToken($options = [])
         {
             if (!$this->_token && $this->_try_redirect) {
                 $authUri = \Gini\Config::get('oauth.client')['auth_uri'] ?: 'oauth/client/auth';
                 if (\Gini\CGI::route() != $authUri) {
-                    \Gini\CGI::redirect($authUri, [
+                    $params = array_merge($options, [
                         'source' => $this->_source,
                         'redirect_uri' => URL('', $_GET)
                     ]);
+                    \Gini\CGI::redirect($authUri, $params);
                 }
             }
             if ($this->_token->expires < time() && $this->_token->refreshToken) {
@@ -66,12 +69,12 @@ namespace Gini\OAuth {
             return $this->_token;
         }
 
-        public function fetchAccessToken($grant = 'authorization_code', $params = [])
+        public function fetchAccessToken($grant = 'authorization_code', $options = [])
         {
             $sessionKeyForToken =
                 \Gini\Config::get('oauth.client')['session_key']['token'];
             try {
-                $this->_token = $this->_driver->getAccessToken($grant, $params);
+                $this->_token = $this->_driver->getAccessToken($grant, $options);
                 $_SESSION[$sessionKeyForToken][$this->_source] = [
                     'access_token' => $this->_token->accessToken,
                     'refresh_token' => $this->_token->refreshToken,

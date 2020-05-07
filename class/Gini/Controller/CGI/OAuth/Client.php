@@ -17,14 +17,14 @@ class Client extends \Gini\Controller\CGI
             \Gini\Config::get('oauth.client')['session_key']['redirect_uri'];
 
         if (isset($form['error'])) {
-            $_SESSION[$sessionKeyForToken][$source] = '@'.$form['error'];
+            $_SESSION[$sessionKeyForToken][$source] = '@' . $form['error'];
         } elseif (isset($form['code'])) {
             // got authorization code, try to acquire access token
-            $client->fetchAccessToken('authorization_code', ['code'=>$form['code']]);
+            $client->fetchAccessToken('authorization_code', $form);
         } else {
             // start oauth process...
             $_SESSION[$sessionKeyForRedirectUri][$source] = $form['redirect_uri'] ?: '/';
-            $client->authorize();
+            $client->authorize($form);
             return;
         }
 
