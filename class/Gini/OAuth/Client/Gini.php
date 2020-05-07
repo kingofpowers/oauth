@@ -6,10 +6,9 @@ use \League\OAuth2\Client\Provider\AbstractProvider;
 use \League\OAuth2\Client\Token\AccessToken;
 use \League\OAuth2\Client\Provider\ResourceOwnerInterface;
 use \League\OAuth2\Client\Provider\Exception\IdentityProviderException;
-use \Psr\Http\Message\RequestInterface;
 use \Psr\Http\Message\ResponseInterface;
 
-class GiniOwner extends ResourceOwnerInterface
+class GiniOwner implements ResourceOwnerInterface
 {
     /**
      * @var array
