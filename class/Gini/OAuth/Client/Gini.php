@@ -93,7 +93,7 @@ class Gini extends AbstractProvider
      */
     protected function getDefaultScopes()
     {
-        return ['user', 'device', 'app'];
+        return ['user'];
     }
 
     /**
