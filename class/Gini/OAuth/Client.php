@@ -19,10 +19,10 @@ namespace Gini\OAuth {
             $sessionKeyForToken =
                 \Gini\Config::get('oauth.client')['session_key']['token'];
             if (isset($_SESSION[$sessionKeyForToken][$source])) {
-                $token = $_SESSION[$sessionKeyForToken][$source];
+                $data = $_SESSION[$sessionKeyForToken][$source];
                 // \Gini\Logger::of('oauth')->error('invalid token: {error}!', ['error' => $token['error']]);
-                if (!isset($token['error'])) {
-                    $this->_token = new \League\OAuth2\Client\Token\AccessToken($token);
+                if (!isset($data['error'])) {
+                    $this->_token = new \League\OAuth2\Client\Token\AccessToken($data);
                 }
             }
 

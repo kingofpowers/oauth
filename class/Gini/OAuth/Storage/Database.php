@@ -105,7 +105,7 @@ namespace Gini\OAuth\Storage {
                     'DELETE FROM "_oauth_sessions" WHERE "group"=:group',
                     null,
                     [
-                        ':clientId' => $clientId, ':group' => \Gini\Session::id(),
+                        ':group' => \Gini\Session::id(),
                     ]
                 );
             }
