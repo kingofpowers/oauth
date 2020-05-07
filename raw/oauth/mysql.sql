@@ -19,7 +19,7 @@ CREATE TABLE `_oauth_client_endpoints` (
 CREATE TABLE `_oauth_sessions` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `client_id` char(40) NOT NULL,
-  `owner_type` enum('user','client') NOT NULL DEFAULT 'user',
+  `owner_type` enum('user','device','app') NOT NULL DEFAULT 'user',
   `owner_id` varchar(255) NOT NULL,
   `group` varchar(255) NOT NULL,
   PRIMARY KEY (`id`),
