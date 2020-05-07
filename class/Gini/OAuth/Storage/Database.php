@@ -3,9 +3,9 @@
 namespace Gini\OAuth\Storage {
 
     class Database implements
-    \League\OAuth2\Server\Storage\ClientInterface,
-    \League\OAuth2\Server\Storage\SessionInterface,
-    \League\OAuth2\Server\Storage\ScopeInterface
+        \League\OAuth2\Server\Storage\ClientInterface,
+        \League\OAuth2\Server\Storage\SessionInterface,
+        \League\OAuth2\Server\Storage\ScopeInterface
     {
         private $_db;
 
@@ -75,7 +75,8 @@ namespace Gini\OAuth\Storage {
             );
         }
 
-        public function getAllClients() {
+        public function getAllClients()
+        {
             $db = $this->_db;
             $st = $db->query(
                 'SELETE "client_id" FROM "_oauth_sessions" WHERE "group"=:group',
@@ -88,16 +89,26 @@ namespace Gini\OAuth\Storage {
             return ($st && $st->count() > 0) ? $st->rows(\PDO::FETCH_ASSOC) : [];
         }
 
-        public function deleteAllSessions($clientId)
+        public function deleteAllSessions($clientId = null)
         {
             $db = $this->_db;
-            $db->query(
-                'DELETE FROM "_oauth_sessions" WHERE "client_id"=:clientId AND "group"=:group',
-                null,
-                [
-                    ':clientId' => $clientId, ':group' => \Gini\Session::id(),
-                ]
-            );
+            if ($clientId) {
+                $db->query(
+                    'DELETE FROM "_oauth_sessions" WHERE "client_id"=:clientId AND "group"=:group',
+                    null,
+                    [
+                        ':clientId' => $clientId, ':group' => \Gini\Session::id(),
+                    ]
+                );
+            } else {
+                $db->query(
+                    'DELETE FROM "_oauth_sessions" WHERE "group"=:group',
+                    null,
+                    [
+                        ':clientId' => $clientId, ':group' => \Gini\Session::id(),
+                    ]
+                );
+            }
         }
 
         public function associateRedirectUri($sessionId, $redirectUri)
@@ -290,5 +301,4 @@ namespace Gini\OAuth\Storage {
             return ($st && $st->count() > 0) ? $st->row(\PDO::FETCH_ASSOC) : false;
         }
     }
-
 }
