@@ -63,9 +63,9 @@ namespace Gini\OAuth {
                     \Gini\CGI::redirect($authUri, $params);
                 }
             }
-            if ($this->_token->expires < time() && $this->_token->refreshToken) {
+            if ($this->_token->hasExpired()&& $this->_token->getRefreshToken()) {
                 $params = array_merge($options, [
-                    'refresh_token' => $this->_token->refreshToken
+                    'refresh_token' => $this->_token->getRefreshToken()
                 ]);
                 $this->fetchAccessToken('refresh_token', $params);
             }
