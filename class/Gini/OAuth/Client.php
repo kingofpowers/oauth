@@ -112,8 +112,7 @@ namespace Gini\OAuth {
                 $owner = $this->_driver->getResourceOwner($token);
                 if ($owner['type'] !== 'user') return null;
 
-                    $username = $owner['id'];
-                }
+                $username = $owner['id'];
                 list($username, $backend) = \Gini\Auth::parseUserName($username);
 
                 if ($backend) {
@@ -125,6 +124,5 @@ namespace Gini\OAuth {
                 return \Gini\Auth::makeUserName($username, $backend);
             }
         }
-
     }
 }

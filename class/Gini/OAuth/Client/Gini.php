@@ -16,7 +16,8 @@ class GiniOwner extends ResourceOwnerInterface
      */
     protected $response;
 
-    public function __construct(array $response) {
+    public function __construct(array $response)
+    {
         $this->response = $response;
     }
 
@@ -124,12 +125,11 @@ class Gini extends AbstractProvider
             if (!is_string($error)) {
                 $error = var_export($error, true);
             }
-            $code  = $this->responseCode && !empty($data[$this->responseCode])? $data[$this->responseCode] : 0;
+            $code  = $this->responseCode && !empty($data[$this->responseCode]) ? $data[$this->responseCode] : 0;
             if (!is_int($code)) {
                 $code = intval($code);
             }
             throw new IdentityProviderException($error, $code, $data);
         }
     }
-
 }
