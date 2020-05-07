@@ -78,12 +78,7 @@ namespace Gini\OAuth {
                 \Gini\Config::get('oauth.client')['session_key']['token'];
             try {
                 $this->_token = $this->_driver->getAccessToken($grant, $options);
-                $_SESSION[$sessionKeyForToken][$this->_source] = [
-                    'access_token' => $this->_token->accessToken,
-                    'refresh_token' => $this->_token->refreshToken,
-                    'expires' => $this->_token->expires,
-                    'uid' => $this->_token->uid,
-                ];
+                $_SESSION[$sessionKeyForToken][$this->_source] = $this->_token->jsonSerialize();
             } catch (\Exception $e) {
                 $this->_token = null;
                 $_SESSION[$sessionKeyForToken][$this->_source] = [
