@@ -64,7 +64,10 @@ namespace Gini\OAuth {
                 }
             }
             if ($this->_token->expires < time() && $this->_token->refreshToken) {
-                $this->fetchAccessToken('refresh_token', ['refresh_token' => $this->_token->refreshToken]);
+                $params = array_merge($options, [
+                    'refresh_token' => $this->_token->refreshToken
+                ]);
+                $this->fetchAccessToken('refresh_token', $params);
             }
             return $this->_token;
         }
