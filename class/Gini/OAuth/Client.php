@@ -13,7 +13,7 @@ namespace Gini\OAuth {
         public function __construct($source)
         {
             $this->_source = $source;
-            list($source_name, ) = explode('/', $source);
+            list($source_name,) = explode('/', $source);
             $this->_source_name = $source_name;
 
             $sessionKeyForToken =
@@ -28,7 +28,7 @@ namespace Gini\OAuth {
 
             $options = (array) \Gini\Config::get('oauth.client')['servers'][$source_name];
             $authUri = \Gini\Config::get('oauth.client')['auth_uri'] ?: 'oauth/client/auth';
-            $driver_class = '\Gini\OAuth\Client\\'.($options['driver']?:'Unknown');
+            $driver_class = '\Gini\OAuth\Client\\' . ($options['driver'] ?: 'Unknown');
 
             $this->_driver = \Gini\IoC::construct($driver_class, [
                 'clientId' => $options['client_id'],
@@ -38,61 +38,12 @@ namespace Gini\OAuth {
             ]);
         }
 
-        public function getUserName()
-        {
-            $token = $this->getAccessToken();
-            if ($this->_token) {
-                $uid = $this->_driver->getUserUid($this->_token);
-                list($username, $backend) = \Gini\Auth::parseUserName($uid);
-
-                if ($backend) {
-                    $backend .= '%' . $this->_source_name;
-                } else {
-                    $backend = $this->_source_name;
-                }
-
-                return \Gini\Auth::makeUserName($username, $backend);
-            }
-        }
-
         public function authorize()
         {
             $this->_driver->authorize();
         }
 
-        public function getUserUid()
-        {
-            $token = $this->getAccessToken();
-            if ($token) {
-                return $this->_driver->getUserUid($token);
-            }
-        }
-
-        public function getUserDetails()
-        {
-            $token = $this->getAccessToken();
-            if ($token) {
-                return $this->_driver->getUserDetails($token);
-            }
-        }
-
-        public function getUserEmail()
-        {
-            $token = $this->getAccessToken();
-            if ($token) {
-                return $this->_driver->getUserEmail($token);
-            }
-        }
-
-        public function getUserScreenName()
-        {
-            $token = $this->getAccessToken();
-            if ($token) {
-                return $this->_driver->getUserScreenName($token);
-            }
-        }
-
-        public function tryRedirect($try_redirect=true)
+        public function tryRedirect($try_redirect = true)
         {
             $this->_try_redirect = !!$try_redirect;
             return $this;
@@ -134,6 +85,46 @@ namespace Gini\OAuth {
                 ];
             }
         }
-    }
 
+        public function getOwner()
+        {
+            $token = $this->getAccessToken();
+            if ($token) {
+                return $this->_driver->getResourceOwner($token)->toArray();
+            }
+        }
+
+        // 为了向后兼容
+        public function getUserDetails()
+        {
+            $data = $this->getOwner();
+            return $data['type'] === 'user' ? [
+                'username' => $data['id'],
+            ] : [
+                'username' => null
+            ];
+        }
+
+        public function getUserName()
+        {
+            $token = $this->getAccessToken();
+            if ($token) {
+                $owner = $this->_driver->getResourceOwner($token);
+                if ($owner['type'] !== 'user') return null;
+
+                    $username = $owner['id'];
+                }
+                list($username, $backend) = \Gini\Auth::parseUserName($username);
+
+                if ($backend) {
+                    $backend .= '%' . $this->_source_name;
+                } else {
+                    $backend = $this->_source_name;
+                }
+
+                return \Gini\Auth::makeUserName($username, $backend);
+            }
+        }
+
+    }
 }
