@@ -17,7 +17,14 @@ class GiniOwner implements ResourceOwnerInterface
 
     public function __construct(array $response)
     {
-        $this->response = $response;
+        if (array_key_exists('username', $response)) {
+            $this->response = [
+                'type' => 'user',
+                'id' => $response['user']
+            ];
+        } else {
+            $this->response = $response;
+        }
     }
 
     /**
@@ -80,7 +87,7 @@ class Gini extends AbstractProvider
      */
     public function getResourceOwnerDetailsUrl(AccessToken $token)
     {
-        return URL($this->options['user'], ['access_token' => (string) $token]);
+        return URL($this->options['owner'] ?: $this->options['user'], ['access_token' => (string) $token]);
     }
 
     /**
