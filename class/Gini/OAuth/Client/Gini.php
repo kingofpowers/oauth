@@ -20,7 +20,7 @@ class GiniOwner implements ResourceOwnerInterface
         if (array_key_exists('username', $response)) {
             $this->response = [
                 'type' => 'user',
-                'id' => $response['user']
+                'id' => $response['username']
             ];
         } else {
             $this->response = $response;
