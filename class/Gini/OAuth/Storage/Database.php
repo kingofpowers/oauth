@@ -79,7 +79,7 @@ namespace Gini\OAuth\Storage {
         {
             $db = $this->_db;
             $st = $db->query(
-                'SELETE "client_id" FROM "_oauth_sessions" WHERE "group"=:group',
+                'SELECT "client_id" FROM "_oauth_sessions" WHERE "group"=:group',
                 null,
                 [
                     ':group' => \Gini\Session::id(),
