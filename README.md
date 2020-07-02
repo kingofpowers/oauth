@@ -2,6 +2,9 @@
 
 ## RELEASE LOG
 
+- 2020.07.02 0.4.13
+  1. 修正一个getAllClients无法获取客户端的问题
+
 - 2020.05.08 升级到 0.4.x
 
   1. 获取`accessToken`增加了内部认证方式 `internal`.
