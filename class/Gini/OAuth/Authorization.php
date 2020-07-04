@@ -1,9 +1,9 @@
 <?php
 
 namespace Gini\OAuth {
+
     class Authorization
     {
-        private $_server;
         private $_params;
         private $_session;
         private $_client;
@@ -12,16 +12,19 @@ namespace Gini\OAuth {
         public function __construct()
         {
             // ClientInterface $client, SessionInterface $session, ScopeInterface $scope
-            $storageConfig = (array)\Gini\Config::get('oauth.server')['storage'];
+            $storageConfig = (array) \Gini\Config::get('oauth.server')['storage'];
+
             $sessionBackend = $storageConfig['session'] ?: $storageConfig['default'] ?: 'database';
             $this->_session = \Gini\IoC::construct('\Gini\OAuth\Storage\\' . $sessionBackend);
+
             $clientBackend = $storageConfig['client'] ?: $storageConfig['default'] ?: 'database';
             $this->_client = \Gini\IoC::construct('\Gini\OAuth\Storage\\' . $clientBackend);
+
             $scopeBackend = $storageConfig['scope'] ?: $storageConfig['default'] ?: 'database';
             $this->_scope = \Gini\IoC::construct('\Gini\OAuth\Storage\\' . $scopeBackend);
         }
 
-        public function handle()
+        public function server()
         {
             return new \League\OAuth2\Server\Authorization($this->_client, $this->_session, $this->_scope);
         }
@@ -29,7 +32,7 @@ namespace Gini\OAuth {
         public function isValid()
         {
             try {
-                $server = $this->handle();
+                $server = $this->server();
                 $server->addGrantType(new \League\OAuth2\Server\Grant\AuthCode);
                 $this->_params = $server
                     ->getGrantType('authorization_code')
@@ -46,14 +49,14 @@ namespace Gini\OAuth {
             return $this->_params['client_details'];
         }
 
-        public function authorize($username)
+        public function authorize($username, $scope = 'user')
         {
-            $server = $this->handle();
+            $server = $this->server();
             $server->addGrantType(new \League\OAuth2\Server\Grant\AuthCode);
             // Generate an authorization code
             $code
                 = $server->getGrantType('authorization_code')
-                ->newAuthoriseRequest('user', $username, $this->_params);
+                ->newAuthoriseRequest($scope, $username, $this->_params);
             return \League\OAuth2\Server\Util\RedirectUri::make(
                 $this->_params['redirect_uri'],
                 [
@@ -65,7 +68,7 @@ namespace Gini\OAuth {
 
         public function deny()
         {
-            $server = $this->handle();
+            $server = $this->server();
             return \League\OAuth2\Server\Util\RedirectUri::make(
                 $this->_params['redirect_uri'],
                 [
@@ -76,16 +79,30 @@ namespace Gini\OAuth {
             );
         }
 
-        public function issueAccessToken($params = null)
+        public function setRefreshTokenExpireTime($refresh_token, $client_id, $expireTime)
+        {
+            $this->_session->setRefreshTokenExpireTime($refresh_token, $client_id, $expireTime);
+            return true;
+        }
+
+        public function issueAccessToken($params = null, $internal = false)
         {
             if (!is_array($params)) {
                 $params = $_POST;
             }
-            $server = $this->handle();
-            $server->addGrantType(new \League\OAuth2\Server\Grant\AuthCode);
 
-            $grantType = new \League\OAuth2\Server\Grant\RefreshToken;
-            $server->addGrantType($grantType);
+            $server = $this->server();
+            if ($params['ttl']) {
+                $server->setAccessTokenTTL($params['ttl']);
+            }
+
+            if ($internal) {
+                $server->addGrantType(new \Gini\OAuth\Grant\Internal);
+            }
+
+            $server->addGrantType(new \League\OAuth2\Server\Grant\AuthCode);
+            $server->addGrantType(new \League\OAuth2\Server\Grant\RefreshToken);
+
             try {
                 // Tell the auth server to issue an access token
                 $response = $server->issueAccessToken($params);
@@ -111,11 +128,14 @@ namespace Gini\OAuth {
             return $response;
         }
 
-        public function setRefreshTokenTTL($refresh_token,$client_id,$ttl_time)
+        public function destroyCurrentSessions()
         {
-            $this->_session->setRefreshTokenExpireTime($refresh_token, $client_id, time()+$ttl_time);
-            return true;
+            $this->_session->deleteAllSessions();
+        }
+
+        public function getCurrentSessions()
+        {
+            return $this->_session->getAllClients();
         }
     }
 }
-
